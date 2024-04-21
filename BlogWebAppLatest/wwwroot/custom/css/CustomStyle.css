@@ -1,0 +1,16 @@
+﻿/*forned part css*/
+
+.post-img:hover img {
+
+    height: auto;
+    transition: transform 0.7s ease-in-out!important;
+}
+.post-img:hover img {
+    transform: scale(1.8); /* Adjust the scale factor as needed */
+}
+/*.post-img:has(:hover) img {
+    transform: scale(4.2);*/ /* Adjust the scale factor as needed */
+/*}*/
+/*.post-img img:hover {
+    transform: scale(1);*/ /* Zoom effect on mouse leave */
+/*}*/

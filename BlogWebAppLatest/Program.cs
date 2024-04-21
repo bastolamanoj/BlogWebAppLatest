@@ -46,7 +46,7 @@ app.UseEndpoints(endpoints =>
     // Map the default MVC controller route
     endpoints.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");
+        pattern: "{controller=Blog}/{action=Index}/{id?}");
 
     // Map Razor Pages
     endpoints.MapRazorPages();

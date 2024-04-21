@@ -2,13 +2,14 @@
 
 namespace BlogWebApp.Models
 {
-    public class UserDetails
+    public class UserDetail
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string? Position { get; set; }
+
+        [MaxLength(500, ErrorMessage = "Your Bio must be at most 500 characters")]
         public string? Bio { get;set; } 
-        public string? Email { get; set; }  
         public string? Address { get; set; }  
         public string? ProfileUrl { get; set; }
         public string UserId { get; set; } // Foreign key to associate with a user

@@ -1,0 +1,105 @@
+﻿@using BlogWebApp.Models;
+@model Blog;
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Add Blog";
+}
+<style>
+    .image-picker-div{
+        display: none;
+    }
+</style>
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"></h5>
+
+                    <!-- Vertical Form -->
+                    <form class="row g-3">
+                        <div class="col-12">
+                            <label for="inputNanme4" class="form-label label-title">Blog Title</label>
+                            <input type="text" class="form-control" id="inputNanme4">
+                        </div> 
+                        <div class="col-12">
+                            <label for="inputNanme4" class="form-label label-title">Blog Body</label>
+                            @* <input type="text" class="form-control" id="inputNanme4"> *@
+                            <div class="card mb-1">
+                                <div class="card-body">
+                                    @* <h5 class="card-title">Quill Editor Default</h5> *@
+
+                                    <!-- Quill Editor Default -->
+                                    <div class="quill-editor-default">
+                                        <p>Hello World!</p>
+                                        <p>This is Quill <strong>default</strong> editor</p>
+                                    </div>
+                                    <!-- End Quill Editor Default -->
+
+                                </div>
+                            </div>
+
+                        </div>
+                       
+                        <div class="col-12 d-flex">
+                            <label asp-for="BlogCategoryId" class="form-label label-title">Category:</label>
+                            @* <select asp-for="BlogCategoryId" asp-items="@ViewBag.Categories" class="form-control"></select> *@
+                        </div> 
+                        <div class="col-12 d-flex">
+                            <label for="inputNanme4" class="form-label me-4 label-title">Has Image ?</label>
+                            <div class="form-check ms-3 form-switch has-image">
+                                <input class="form-check-input has-image" type="checkbox" id="flexSwitchCheckDefault"> 
+                            </div>
+                        </div> 
+                        
+                        <div class="col-12 mt-1 image-picker-div">
+                            <label for="inputAddress" class="form-label">Pick File </label>
+                            <input id="input-file" type="file" name="input-file[]" multiple>
+                        </div>
+                        <div class="text-left">
+                            <button type="submit" class="btn btn-primary rounded-pill"> <i class="bi bi-collection"></i> Publish </button>
+                            @* <button type="reset" class="btn btn-secondary">Reset</button> *@
+                        </div>
+                    </form><!-- Vertical Form -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.2.8/js/fileinput.min.js"></script>
+
+ <script type="text/javascript">
+    $(document).ready(function () {
+        debugger;
+        $("#input-file").fileinput({
+            showUpload: false,
+            showRemove: false,
+            maxFileCount: 3 // Limit the maximum number of files
+        });
+
+        $('.has-image.form-switch').click(function () {
+            // Check if the toggle switch is checked
+            if ($(".has-image").is(':checked')) {
+                // If checked, show the div element
+                $('.image-picker-div').show();
+            } else {
+                // If not checked, hide the div element
+                $('.image-picker-div').hide();
+            }
+        });
+
+    });
+
+    // $(document).ready(function () {
+    //     console.log("Printed");
+    //     // Your jQuery code here
+    // });
+
+</script> 
+   

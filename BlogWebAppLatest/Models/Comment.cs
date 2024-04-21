@@ -6,10 +6,10 @@ namespace BlogWebApp.Models
     public class Comment
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Content { get; set; }
         public Guid BlogId { get; set; }
-        public Guid AuthorId { get; set; }
+        public Guid CommentedBy { get; set; }
         public DateTime CreationDate { get; set; }
 
         // Navigation property to access the blog associated with the comment
@@ -20,5 +20,8 @@ namespace BlogWebApp.Models
 
         // Navigation property to access the notifications associated with the comment
         public ICollection<Notification> Notifications { get; set; }
+
+        // Navigation property to access the Reaction associated with the comment
+        public ICollection<Reaction> Reactions { get; set; }
     }
 }
