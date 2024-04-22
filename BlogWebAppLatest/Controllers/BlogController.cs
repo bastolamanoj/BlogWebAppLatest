@@ -35,14 +35,14 @@ namespace BlogWebApp.Controllers
         [HttpGet("addblog")]
         public IActionResult AddBlog()
         {
-            var categories = new List<BlogCategory>
-                {
-                    new BlogCategory { Id = 1, Name = "Category 1" },
-                    new BlogCategory { Id = 2, Name = "Category 2" },
-                    new BlogCategory { Id = 3, Name = "Category 3" }
-                };
-
-            ViewBag.Categories = new SelectList(categories, "Value", "Text");
+            //var categories = new List<BlogCategory>
+            //    {
+            //        new BlogCategory { Id = 1, Name = "Category 1" },
+            //        new BlogCategory { Id = 2, Name = "Category 2" },
+            //        new BlogCategory { Id = 3, Name = "Category 3" }
+            //    };
+            var categories = _dbContext.BlogCategories.ToList();
+            ViewBag.Categories = new SelectList(categories, "Id", "Name");
             return View();
         }
 
@@ -60,10 +60,8 @@ namespace BlogWebApp.Controllers
             return View();
         }
 
-
-
-        [HttpPost("AddBlog")]
-        public async Task<IActionResult> AddBlog([FromForm] BlogVM model)
+        [HttpPost]
+        public async Task<IActionResult> AddBlog(BlogVM model)
         {
             var user = await _userManager.GetUserAsync(User);
             var userid = user.Id;
@@ -97,5 +95,38 @@ namespace BlogWebApp.Controllers
             }
             return View(model);
         }
+
+        [HttpPost("RemoveBlog/{id}")]
+        public async Task<IActionResult> RemoveBlog(Guid id)
+        {
+            // Find the blog by its ID
+            var blog = await _dbContext.Blogs.FindAsync(id);
+
+            if (blog == null)
+            {
+                return NotFound(); // Blog not found
+            }
+
+            // Remove associated entities
+            // Remove blog images
+            var blogImages = _dbContext.BlogImages.Where(bi => bi.BlogId == id);
+            _dbContext.BlogImages.RemoveRange(blogImages);
+
+            // Remove comments
+            var comments = _dbContext.Comments.Where(c => c.BlogId == id);
+            _dbContext.Comments.RemoveRange(comments);
+
+            // Remove notifications (assuming you have a Notifications table related to blogs)
+            var notifications = _dbContext.Notifications.Where(n => n.BlogId == id);
+            _dbContext.Notifications.RemoveRange(notifications);
+
+            // Remove the blog itself
+            _dbContext.Blogs.Remove(blog);
+
+            await _dbContext.SaveChangesAsync();
+
+            return RedirectToAction("Index", "Home"); // Redirect to home page or any other page after removal
+        }
+
     }
 }

@@ -22,7 +22,7 @@
                     <form class="row g-3" action="/Blog/AddBlog" method="post">
                         <div class="col-12">
                             <label for="inputNanme4" class="form-label label-title">Blog Title</label>
-                            <input type="text" class="form-control" id="inputNanme4">
+                            <input type="text" class="form-control blogtitle">
                         </div> 
                         <div class="col-12">
                             <label asp-for="Body" class="form-label label-title">Blog Body</label>
@@ -32,7 +32,7 @@
                                     @* <h5 class="card-title">Quill Editor Default</h5> *@
 
                                     <!-- Quill Editor Default -->
-                                    <div asp-for="Body" class="quill-editor-default">
+                                    <div asp-for="Body" class="quill-editor-default blogbody">
                                         <p>Hello World!</p>
                                         <p>This is Quill <strong>default</strong> editor</p>
                                     </div>
@@ -45,7 +45,15 @@
                        
                         <div class="col-12 d-flex">
                             <label asp-for="BlogCategoryId" class="form-label label-title">Category:</label>
-                            @* <select asp-for="BlogCategoryId" asp-items="@ViewBag.Categories" class="form-control"></select> *@
+                            @if (ViewBag.Categories != null)
+                            {
+                                <select asp-for="BlogCategoryId" asp-items="@ViewBag.Categories" class="form-control blogcategory"></select>
+                            }
+                            else 
+                            {
+                                <span> No Categories Added</span>                            
+                            }
+
                         </div> 
                         <div class="col-12 d-flex">
                             <label for="inputNanme4" class="form-label me-4 label-title">Has Image ?</label>
@@ -76,7 +84,7 @@
 
  <script type="text/javascript">
     $(document).ready(function () {
-    
+
         $("#input-file").fileinput({
             showUpload: false,
             showRemove: false,
@@ -94,48 +102,72 @@
             }
         });
 
-    });
+        var fileLinks = []; // Array to store file links
 
-    var fileLinks = []; // Array to store file links
+        // $('#input-file').change(function () {
 
-    // $('#input-file').change(function () {
-        
-    // });
+        // });
 
-    $(".publishPost").click(function () {
-       
-        var files = $('#input-file')[0].files;
-        if (files.length === 0) {
-            alert('Please select one or more files.');
-            return;
-        }
+        $(".publishPost").click(async function () {
 
-        for (var i = 0; i < files.length; i++) {
-            var file = files[i];
-            if (file.size > 3 * 1024 * 1024) {
-                alert('File size exceeds 3MB limit');
-                continue; // Move to the next file
+            var files = $('#input-file')[0].files;
+            if (files.length === 0) {
+                alert('Please select one or more files.');
+                return;
             }
-            var formData = new FormData();
-            formData.append('file', file);
-            $.ajax({
-                url: 'File/UploadFile',
+
+            for (var i = 0; i < files.length; i++) {
+
+                var file = files[i];
+                if (file.size > 3 * 1024 * 1024) {
+                    alert('File size exceeds 3MB limit');
+                    continue; // Move to the next file
+                }
+                var formData = new FormData();
+                formData.append('file', file);
+                await $.ajax({
+                    url: 'File/UploadFile',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        console.log('File uploaded successfully:', response);
+                        // Assuming response contains the link to the uploaded file
+                        fileLinks.push({ ImageName: file.name, Url: response });
+                    },// Assuming fileLink is the key for the link in the response
+
+                    error: function (xhr, status, error) {
+                        console.error('Error uploading file:', error);
+                    }
+                });
+            }
+            var model = {
+                Title: $(`.blogtitle`).val(),
+                Body: $(`.blogbody`).html(),
+                BlogCategoryId: parseInt($(`.blogcategory`).val()),
+                BlogImages: fileLinks
+            }
+            debugger;
+            await $.ajax({
+                url: '/Blog/AddBlog',
                 type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
+                data: model,
+               
                 success: function (response) {
-                    console.log('File uploaded successfully:', response);
-                    // Assuming response contains the link to the uploaded file
-                    fileLinks.push(response.fileLink); // Assuming fileLink is the key for the link in the response
+                    console.log(response);
+                    // Handle success response
                 },
                 error: function (xhr, status, error) {
-                    console.error('Error uploading file:', error);
+                    // Handle error
+                    console.log(error);
                 }
             });
-        }
+        });
     });
 
+
+    
 
 </script> 
    

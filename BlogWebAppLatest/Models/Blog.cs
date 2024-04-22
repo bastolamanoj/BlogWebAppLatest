@@ -22,9 +22,5 @@ namespace BlogWebApp.Models
         public ICollection<BlogImage> BlogImages { get; set; } // Collection of images associated with the blog
         public ICollection<BlogCategory> BlogCategories { get; set; }
 
-        public static implicit operator Blog(Blog v)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

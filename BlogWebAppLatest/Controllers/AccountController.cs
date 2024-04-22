@@ -47,9 +47,19 @@ namespace BlogWebApp.Controllers
             if(ModelState.IsValid)
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Email,model.Password,model.RememberMe,false);
+                //await _signInManager.SignInAsync(user, false);
+
+                User user = new()
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    //PasswordHash= model.Password
+
+                };
                 if (result.Succeeded) {
                     return RedirectToAction("Index", "Blog");
                 }
+                await _signInManager.SignInAsync(user, false);
                 ModelState.AddModelError("", "Invalid Login Attempt");
                 return View(model);
             }
@@ -72,6 +82,23 @@ namespace BlogWebApp.Controllers
 
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded) {
+                    // Assign Default Role Admin to first registar; rest is user
+                    var checkAdmin = await _roleManager.FindByNameAsync("Admin");
+                    if (checkAdmin is null)
+                    {
+                        await _roleManager.CreateAsync(new Role() { Name = "Admin", AliasName = "Admin" });
+                        await _userManager.AddToRoleAsync(user, "Admin");
+                        //return new GeneralResponse(true, "Account Created.");
+                    }
+                    else
+                    {
+                        var checkUser = await _roleManager.FindByNameAsync("Blogger");
+                        if (checkUser is null)
+                            await _roleManager.CreateAsync(new Role() { Name = "Blogger", AliasName = "Blogger" });
+                        await _userManager.AddToRoleAsync(user, "Blogger");
+                        //return new GeneralResponse(true, "Account Created.");
+                    }
+
                     await _signInManager.SignInAsync(user, false);
                     return RedirectToAction("Index", "Blog");
                 }
@@ -80,24 +107,6 @@ namespace BlogWebApp.Controllers
                 {
                     ModelState.AddModelError("", error.Description);
                 }
-
-                // Assign Default Role Admin to first registar; rest is user
-                var checkAdmin = await _roleManager.FindByNameAsync("Admin");
-                if (checkAdmin is null)
-                {
-                    await _roleManager.CreateAsync(new Role() { Name = "Admin", AliasName = "Admin" });
-                    await _userManager.AddToRoleAsync(user, "Admin");
-                    //return new GeneralResponse(true, "Account Created.");
-                }
-                else
-                {
-                    var checkUser = await _roleManager.FindByNameAsync("Blogger");
-                    if (checkUser is null)
-                        await _roleManager.CreateAsync(new Role() { Name = "Blogger", AliasName = "Blogger" });
-                    await _userManager.AddToRoleAsync(user, "Blogger");
-                    //return new GeneralResponse(true, "Account Created.");
-                }
-
             }
             return View(model);
         }
