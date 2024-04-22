@@ -44,29 +44,42 @@ namespace BlogWebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginVM model)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email,model.Password,model.RememberMe,false);
-                //await _signInManager.SignInAsync(user, false);
+                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+                //var user = await _userManager.FindByNameAsync(model.Email);
 
-                User user = new()
+                if (result.Succeeded)
                 {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    //PasswordHash= model.Password
-
-                };
-                if (result.Succeeded) {
                     return RedirectToAction("Index", "Blog");
                 }
-                await _signInManager.SignInAsync(user, false);
-                ModelState.AddModelError("", "Invalid Login Attempt");
-                return View(model);
+                else if (result.IsNotAllowed)
+                {
+                    // Optionally, you can check if the user is locked out or needs email confirmation.
+                    // For example:
+                    var user = await _userManager.FindByEmailAsync(model.Email);
+                    if (user != null && !await _userManager.IsEmailConfirmedAsync(user))
+                    {
+                        // Redirect to a page where the user can confirm their email.
+                        return RedirectToAction("EmailConfirmation", "Account");
+                    }
+                    else
+                    {
+                        // Handle other cases where the user is not allowed to sign in.
+                        ModelState.AddModelError("", "You are not allowed to sign in. Please contact support.");
+                        return View(model);
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Invalid Login Attempt");
+                    return View(model);
+                }
             }
-           return View(model);
+
+            return View(model);
         }
-         
-        
+
         [HttpPost]
         public async Task<IActionResult> Register(RegisterVM model)
         {
@@ -76,6 +89,7 @@ namespace BlogWebApp.Controllers
                  DisplayName= model.Name,
                  UserName= model.Email,
                  Email= model.Email,
+                 EmailConfirmed=true
                  //PasswordHash= model.Password
 
                 };

@@ -64,6 +64,8 @@ namespace BlogWebApp.Controllers
             {
                 _context.Add(blogCategory);
                 await _context.SaveChangesAsync();
+                ViewBag.AlertMessage = "Category Added Successfully.";
+                ViewBag.AlertType = "success"; // or "error", "warning"
                 return RedirectToAction(nameof(Index));
             }
             return View(blogCategory);

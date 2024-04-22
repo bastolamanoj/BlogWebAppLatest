@@ -25,11 +25,11 @@
                 <div class="card-body">
 
                     <div class="pt-2 pb-2">
-                        <h5 class="card-title text-center pb-0 fs-4">Create an Account</h5>
+                        <h5 class="card-title text-center pb-0 fs-4">Add Admin </h5>
                         @* <p class="text-center small">Enter your personal details to create account</p> *@
                     </div>
 
-                    <form action="/Account/Register" method="post" class="row g-2 needs-validation" novalidate>
+                    <form action="/Account/AddAdmin" method="post" class="row g-2 needs-validation" novalidate>
                         <div asp-validation-summary="ModelOnly" class="text-danger"> </div>
                         <div class="col-12">
                             <label asp-for="Name" class="form-label">Full Name</label>
@@ -68,11 +68,11 @@
                             </div>
                         </div>
                         <div class="col-12">
-                            <button class="btn btn-primary w-100" type="submit">Create Account</button>
+                            <button class="btn btn-primary w-100" type="submit">Add </button>
                         </div>
-                        <div class="col-12">
+                       @*  <div class="col-12">
                             <p class="small mb-0">Already have an account? <a asp-controller="Account" asp-action="Login">Log in</a></p>
-                        </div>
+                        </div> *@
                     </form>
 
                 </div>
