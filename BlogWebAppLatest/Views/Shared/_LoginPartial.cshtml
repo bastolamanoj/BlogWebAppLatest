@@ -1,4 +1,5 @@
 ﻿@using BlogWebApp.Models
+@using BlogWebApp.Models.IdentityModel
 @using Microsoft.AspNetCore.Identity
 
 @inject SignInManager<User> SignInManager
@@ -7,6 +8,7 @@
 @* <ul class="navbar-nav"> *@
 @if (SignInManager.IsSignedIn(User))
 {
+    var user = await UserManager.GetUserAsync(User);
 @*     <li class="nav-item">
         <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
     </li> *@
@@ -14,13 +16,14 @@
 
         <a class="nav-link nav-profile d-flex  text-white align-items-center pe-0" href="#" data-bs-toggle="dropdown">
             <img src="~/assets/img/profile-img.jpg" alt="Profile" style="width:50px; height:50px;" class="rounded-circle">
-            <span class="d-none d-md-block dropdown-toggle ps-2">K. Anderson</span>
+            <span class="d-none d-md-block dropdown-toggle ps-2"> @user.NormalizedUserName </span>
         </a><!-- End Profile Iamge Icon -->
 
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
             <li class="dropdown-header">
-                <h6>Dammar Khadayat </h6>
-                <span>Web Designer</span>
+                <h6> @user.Email</h6>
+                <span>  @user.UserName </span> <br />
+                @* <span> </span> *@
             </li>
             <li>
                 <hr class="dropdown-divider">
@@ -57,7 +60,7 @@
             </li>
  *@
             <li>
-                <a class="dropdown-item d-flex align-items-center" href="#">
+                <a class="dropdown-item d-flex align-items-center" asp-controller="Account" asp-action="Logout">
                     <i class="bi text-lg bi-box-arrow-right"></i>
                     <span>Sign Out</span>
                 </a>
@@ -68,7 +71,7 @@
 
     <!-- End Profile Nav -->
     <li class="nav-item">
-        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+        <form class="form-inline" asp-controller="Account" asp-action="Logout">
             <button  type="submit" class="nav-link btn btn-link text-white">Logout</button>
         </form>
     </li>

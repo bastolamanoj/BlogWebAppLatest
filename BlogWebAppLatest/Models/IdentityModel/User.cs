@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace BlogWebApp.Models
+namespace BlogWebApp.Models.IdentityModel
 {
-    public class User: IdentityUser
+    public class User : IdentityUser
     {
         public string? DisplayName { get; set; }
     }

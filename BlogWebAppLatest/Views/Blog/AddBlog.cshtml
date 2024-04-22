@@ -1,5 +1,5 @@
-﻿@using BlogWebApp.Models;
-@model Blog;
+﻿@using BlogWebApp.ViewModel;
+@model BlogVM;
 
 @{
     Layout = "_AdminLayout";
@@ -19,20 +19,20 @@
                     <h5 class="card-title"></h5>
 
                     <!-- Vertical Form -->
-                    <form class="row g-3">
+                    <form class="row g-3" action="/Blog/AddBlog" method="post">
                         <div class="col-12">
                             <label for="inputNanme4" class="form-label label-title">Blog Title</label>
                             <input type="text" class="form-control" id="inputNanme4">
                         </div> 
                         <div class="col-12">
-                            <label for="inputNanme4" class="form-label label-title">Blog Body</label>
+                            <label asp-for="Body" class="form-label label-title">Blog Body</label>
                             @* <input type="text" class="form-control" id="inputNanme4"> *@
                             <div class="card mb-1">
                                 <div class="card-body">
                                     @* <h5 class="card-title">Quill Editor Default</h5> *@
 
                                     <!-- Quill Editor Default -->
-                                    <div class="quill-editor-default">
+                                    <div asp-for="Body" class="quill-editor-default">
                                         <p>Hello World!</p>
                                         <p>This is Quill <strong>default</strong> editor</p>
                                     </div>
@@ -56,10 +56,10 @@
                         
                         <div class="col-12 mt-1 image-picker-div">
                             <label for="inputAddress" class="form-label">Pick File </label>
-                            <input id="input-file" type="file" name="input-file[]" multiple>
+                            <input id="input-file" type="file" accept="image/*" name="input-file[]" multiple>
                         </div>
                         <div class="text-left">
-                            <button type="submit" class="btn btn-primary rounded-pill"> <i class="bi bi-collection"></i> Publish </button>
+                            <button type="button" class="btn btn-primary rounded-pill publishPost"> <i class="bi bi-collection"></i> Publish </button>
                             @* <button type="reset" class="btn btn-secondary">Reset</button> *@
                         </div>
                     </form><!-- Vertical Form -->
@@ -76,7 +76,7 @@
 
  <script type="text/javascript">
     $(document).ready(function () {
-        debugger;
+    
         $("#input-file").fileinput({
             showUpload: false,
             showRemove: false,
@@ -96,10 +96,46 @@
 
     });
 
-    // $(document).ready(function () {
-    //     console.log("Printed");
-    //     // Your jQuery code here
+    var fileLinks = []; // Array to store file links
+
+    // $('#input-file').change(function () {
+        
     // });
+
+    $(".publishPost").click(function () {
+       
+        var files = $('#input-file')[0].files;
+        if (files.length === 0) {
+            alert('Please select one or more files.');
+            return;
+        }
+
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+            if (file.size > 3 * 1024 * 1024) {
+                alert('File size exceeds 3MB limit');
+                continue; // Move to the next file
+            }
+            var formData = new FormData();
+            formData.append('file', file);
+            $.ajax({
+                url: 'File/UploadFile',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    console.log('File uploaded successfully:', response);
+                    // Assuming response contains the link to the uploaded file
+                    fileLinks.push(response.fileLink); // Assuming fileLink is the key for the link in the response
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error uploading file:', error);
+                }
+            });
+        }
+    });
+
 
 </script> 
    

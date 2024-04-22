@@ -1,0 +1,58 @@
+﻿@model BlogWebApp.Models.BlogCategory
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Index";
+}
+
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"></h5>
+                    <h1>Details</h1>
+
+                    <div>
+                        <h4>BlogCategory</h4>
+                        <hr />
+                        <dl class="row">
+                            <dt class="col-sm-2">
+                                @Html.DisplayNameFor(model => model.Name)
+                            </dt>
+                            <dd class="col-sm-10">
+                                @Html.DisplayFor(model => model.Name)
+                            </dd>
+                            <dt class="col-sm-2">
+                                @Html.DisplayNameFor(model => model.Description)
+                            </dt>
+                            <dd class="col-sm-10">
+                                @Html.DisplayFor(model => model.Description)
+                            </dd>
+                            <dt class="col-sm-2">
+                                @Html.DisplayNameFor(model => model.CreatedAt)
+                            </dt>
+                            <dd class="col-sm-10">
+                                @Html.DisplayFor(model => model.CreatedAt)
+                            </dd>
+                            <dt class="col-sm-2">
+                                @Html.DisplayNameFor(model => model.UpdatedAt)
+                            </dt>
+                            <dd class="col-sm-10">
+                                @Html.DisplayFor(model => model.UpdatedAt)
+                            </dd>
+                        </dl>
+                    </div>
+                    <div>
+                        <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+                        <a asp-action="Index">Back to List</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+

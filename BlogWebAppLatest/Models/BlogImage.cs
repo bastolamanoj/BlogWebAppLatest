@@ -1,7 +1,10 @@
-﻿namespace BlogWebApp.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BlogWebApp.Models
 {
     public class BlogImage
     {
+        [Key]
         public int Id { get; set; }
         public string? ImageName { get; set; }
         public string Url { get; set; }

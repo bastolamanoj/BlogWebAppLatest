@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using BlogWebApp.Models.IdentityModel;
 
 namespace BlogWebApp.Models
 {
@@ -11,6 +12,7 @@ namespace BlogWebApp.Models
         [MaxLength(500, ErrorMessage = "Your Bio must be at most 500 characters")]
         public string? Bio { get;set; } 
         public string? Address { get; set; }  
+        public string? Country { get; set; }  
         public string? ProfileUrl { get; set; }
         public string UserId { get; set; } // Foreign key to associate with a user
       

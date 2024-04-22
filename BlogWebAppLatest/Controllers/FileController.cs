@@ -12,7 +12,6 @@ namespace BlogWebApp.Controllers
     //[ApiController]
     public class FileController : Controller
     {
-
         private static IWebHostEnvironment _webHostEnvironment;
 
         public FileController(IWebHostEnvironment webHostEnvironment)

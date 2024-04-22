@@ -1,0 +1,83 @@
+﻿@using BlogWebApp.ViewModel;
+@model RegisterVM;
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Admin";
+}
+
+<div class="pagetitle">
+    <h1> Admins </h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+            <li class="breadcrumb-item">Admin</li>
+            <li class="breadcrumb-item active">ManageAdmin</li>
+        </ol>
+    </nav>
+</div>   
+
+
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="pt-2 pb-2">
+                        <h5 class="card-title text-center pb-0 fs-4">Create an Account</h5>
+                        @* <p class="text-center small">Enter your personal details to create account</p> *@
+                    </div>
+
+                    <form action="/Account/Register" method="post" class="row g-2 needs-validation" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="text-danger"> </div>
+                        <div class="col-12">
+                            <label asp-for="Name" class="form-label">Full Name</label>
+                            <input asp-for="Name" type="text" name="name" class="form-control" id="yourName" required>
+                            <span asp-validation-for="Name" class="invalid-feedback">@* Please, enter your name *@ </span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <div class="input-group has-validation">
+                                @* <span class="input-group-text" id="inputGroupPrepend"> </span> *@
+                                <input asp-for="Email" class="form-control" id="email" required>
+                                <span asp-validation-for="Email" class="text-danger invalid-feedback"> </span>
+
+                                <div class="invalid-feedback">Please enter your email address.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Password" class="form-label">Password</label>
+                            <input type="password" asp-for="Password" class="form-control" required>
+                            <div asp-validation-for="Password" class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                            <input asp-for="ConfirmPassword" type="password" class="form-control" required>
+                            <span asp-validation-for="ConfirmPassword" class="invalid-feedback">  </span>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" name="terms" type="checkbox" value="" id="acceptTerms" required>
+                                @*   <label class="form-check-label" for="acceptTerms">I agree and accept the <a href="#">terms and conditions</a></label>
+                                <div class="invalid-feedback">You must agree before submitting.</div> *@
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-primary w-100" type="submit">Create Account</button>
+                        </div>
+                        <div class="col-12">
+                            <p class="small mb-0">Already have an account? <a asp-controller="Account" asp-action="Login">Log in</a></p>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+

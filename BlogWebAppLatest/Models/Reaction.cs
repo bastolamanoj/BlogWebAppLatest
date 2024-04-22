@@ -1,7 +1,11 @@
-﻿namespace BlogWebApp.Models
+﻿using BlogWebApp.Models.IdentityModel;
+using System.ComponentModel.DataAnnotations;
+
+namespace BlogWebApp.Models
 {
     public class Reaction
     {
+        [Key]
         public int Id { get; set; }
         public string Type { get; set; } // "Upvote" or "Downvote"
         public Guid EntityId { get; set; } // Id of the blog or comment

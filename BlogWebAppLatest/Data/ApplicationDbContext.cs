@@ -1,4 +1,5 @@
 ﻿using BlogWebApp.Models;
+using BlogWebApp.Models.IdentityModel;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,13 +16,21 @@ namespace BlogWebAppLatest.Data
 
         }
 
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<RoleClaim> RoleClaims { get; set; }
+        public DbSet<UserClaim> UserClaims { get; set; }
+
         public DbSet<Blog> Blogs { get; set; }
+        public DbSet<BlogImage> BlogImages { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Reaction> Reactions { get; set; }
-        public DbSet<User> Users { get; set; }
         public DbSet<BlogCategory> BlogCategories { get; set;    }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<UserDetail> UserDetails { get; set; }
+        public DbSet<UserLogin> UserLogins { get; set; }
+        public DbSet<UserToken> UserTokens { get; set; }
 
 
 
@@ -43,6 +52,17 @@ namespace BlogWebAppLatest.Data
             builder.Entity<UserLogin>(e => { e.ToTable(name: "UserLogins"); });
             builder.Entity<UserToken>(e => { e.ToTable(name: "UserTokens"); });
 
+
+            // Other Custom model entity section
+            builder.Entity<Blog>(e => { e.ToTable(name: "Blogs"); });
+            builder.Entity<BlogCategory>(e => { e.ToTable(name: "BlogCategories"); });
+            builder.Entity<BlogImage>(e => { e.ToTable(name: "BlogImages"); });
+            builder.Entity<Comment>(e => { e.ToTable(name: "Comments"); });
+            builder.Entity<Notification>(e => { e.ToTable(name: "Notification"); });
+            builder.Entity<Reaction>(e => { e.ToTable(name: "Reactions"); });
+            builder.Entity<UserDetail>(e => { e.ToTable(name: "UserDetails"); });
+
+        
             // Other Custom model entity section
 
 

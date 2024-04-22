@@ -1,4 +1,5 @@
 ﻿using BlogWebApp.Models;
+using BlogWebApp.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -6,12 +7,14 @@ namespace BlogWebApp.Controllers
 {
     public class DashboardController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger<DashboardController> _logger;
 
-        public DashboardController(ILogger<HomeController> logger)
+        public DashboardController(ILogger<DashboardController> logger)
         {
             _logger = logger;
         }
+
+        [HttpGet("dashboard")]
         public IActionResult Index()
         {
             return View();

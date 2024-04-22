@@ -56,7 +56,6 @@
                             </div><!-- End Logo -->
 
                             <div class="card mb-3">
-
                                 <div class="card-body">
 
                                     <div class="pt-2 pb-2">
@@ -64,8 +63,8 @@
                                         @* <p class="text-center small">Enter your personal details to create account</p> *@
                                     </div>
 
-                                    <form asp-action="/Account/Register" method="post" class="row g-2 needs-validation" novalidate>
-                                        <div asp-validation-summary="ModelOnly"> </div>
+                                    <form action="/Account/Register" method="post" class="row g-2 needs-validation" novalidate>
+                                        <div asp-validation-summary="ModelOnly" class="text-danger"> </div>
                                         <div class="col-12">
                                             <label asp-for="Name" class="form-label">Full Name</label>
                                             <input asp-for="Name" type="text" name="name" class="form-control" id="yourName" required>

@@ -66,7 +66,7 @@
                   </div>
 
                   <form action="/Account/Login" method="post" class="row g-3 needs-validation" novalidate>
-                      <div asp-validation-summary="ModelOnly"> </div>
+                      <div asp-validation-summary="ModelOnly" class="text-danger"> </div>
                     <div class="col-12">
                       <label asp-for="Email" class="form-label">Email</label>
                       <div class="input-group has-validation">
@@ -96,6 +96,7 @@
                     </div>
                     <div class="col-12">
                        <p class="small mb-0">Don't have account? <a asp-controller ="Account" asp-action="Register">Create an account</a></p>
+                        <p class="small mb-0 text-danger text-center"> <a class="text-danger" href="forgetpassword"> Forget Password ?</a></p>
                     </div>
                   </form>
 

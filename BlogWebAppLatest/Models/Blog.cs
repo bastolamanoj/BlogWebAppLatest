@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using BlogWebApp.Models.IdentityModel;
 
 namespace BlogWebApp.Models
 {
@@ -20,5 +21,10 @@ namespace BlogWebApp.Models
         public ICollection<Reaction> Reactions { get; set; }
         public ICollection<BlogImage> BlogImages { get; set; } // Collection of images associated with the blog
         public ICollection<BlogCategory> BlogCategories { get; set; }
+
+        public static implicit operator Blog(Blog v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

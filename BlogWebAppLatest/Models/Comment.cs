@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection.Metadata;
+using BlogWebApp.Models.IdentityModel;
 
 namespace BlogWebApp.Models
 {
@@ -19,7 +20,7 @@ namespace BlogWebApp.Models
         public User Author { get; set; }
 
         // Navigation property to access the notifications associated with the comment
-        public ICollection<Notification> Notifications { get; set; }
+        //public ICollection<Notification> Notifications { get; set; }
 
         // Navigation property to access the Reaction associated with the comment
         public ICollection<Reaction> Reactions { get; set; }

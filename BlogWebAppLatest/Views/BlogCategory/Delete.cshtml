@@ -1,0 +1,66 @@
+﻿@model BlogWebApp.Models.BlogCategory
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Index";
+}
+
+<div class="pagetitle">
+    <h1> Delete Categories</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+            <li class="breadcrumb-item">Category</li>
+            <li class="breadcrumb-item active">Delete Catrgory</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"></h5>
+                    <h3>Are you sure you want to delete this?</h3>
+                    <div>
+                        
+                        <dl class="row">
+                            <dt class="col-sm-4">
+                                @Html.DisplayNameFor(model => model.Name)
+                            </dt>
+                            <dd class="col-sm-7">
+                                @Html.DisplayFor(model => model.Name)
+                            </dd>
+                            <dt class="col-sm-4">
+                                @Html.DisplayNameFor(model => model.Description)
+                            </dt>
+                            <dd class="col-sm-7">
+                                @Html.DisplayFor(model => model.Description)
+                            </dd>
+                            <dt class="col-sm-4">
+                                @Html.DisplayNameFor(model => model.CreatedAt)
+                            </dt>
+                            <dd class="col-sm-7">
+                                @Html.DisplayFor(model => model.CreatedAt)
+                            </dd>
+                            <dt class="col-sm-4">
+                                @Html.DisplayNameFor(model => model.UpdatedAt)
+                            </dt>
+                            <dd class="col-sm-7">
+                                @Html.DisplayFor(model => model.UpdatedAt)
+                            </dd>
+                        </dl>
+
+                        <form asp-action="Delete">
+                            <input type="hidden" asp-for="Id" />
+                            <input type="submit" value="Delete" class="btn btn-danger" /> |
+                            <a asp-action="Index">Back to List</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
