@@ -7,8 +7,21 @@
 }
 
 <!-- ======= Blog Section ======= -->
-<section id="blog" class="blog">
+<section id="blog" class="blog pt-2">
     <div class="container" data-aos="fade-up">
+        <div class="row row-reverse">
+            <div class="col-xl-4 col-md-6 mb-3">
+                <label class="col-sm-2 col-form-label">Sort By</label>
+                <div class="col-sm-10">
+                    <select class="form-select sortblog" aria-label="Default select example">
+                        @* <option selected>Sort By</option> *@
+                        <option value="random_desc" selected>Randomly</option>
+                        <option value="Popularity"> Popularity</option>
+                        <option value="Recency"> Recency </option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
         <div class="row gy-4 posts-list mb-5">
 
@@ -94,3 +107,16 @@
 
     </div>
 </section><!-- End Blog Section -->
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        var sortBlogDropdown = document.querySelector(".sortblog");
+
+        sortBlogDropdown.addEventListener("change", function () {
+            var val = this.value;
+            var selectedUrl = "/?page=1&sortOrder=" + val;
+            window.location.href = selectedUrl;
+        });
+    });
+
+</script>
