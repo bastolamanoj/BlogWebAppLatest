@@ -1,83 +1,72 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BlogWebApp.Models;
+using BlogWebApp.Models.IdentityModel;
+using BlogWebApp.ViewModel;
+using BlogWebAppLatest.Data;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogWebApp.Controllers
 {
     public class ReactionController : Controller
     {
-        // GET: ReactionController
-        public ActionResult Index()
+      private readonly ApplicationDbContext _dbContext;
+        private readonly UserManager<User> _userManager;
+        public ReactionController(ApplicationDbContext dbcontext, UserManager<User> userManager)
         {
-            return View();
+            _dbContext = dbcontext;
+            _userManager = userManager;
         }
 
-        // GET: ReactionController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: ReactionController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: ReactionController/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<IActionResult> UpdateReactionStatus([FromBody] ReactionVM reactions)
         {
+            if (reactions == null)
+            {
+                return BadRequest("Reaction data is null");
+            }
+            Reaction reaction = new Reaction()
+            {
+                EntityType = reactions.EntityType,
+                Type= reactions.Type,
+                EntityId = Guid.Parse(reactions.EntityId)
+
+            };
+            var user = _userManager.GetUserAsync(User).Result;
+            //var user = await _userManager.GetUserAsync(User);
+            var userid = user.Id;
+
+            reaction.UserId = (user == null ? Guid.Empty : (Guid.TryParse(userid, out var userId) ? userId : Guid.Empty));
+           
             try
             {
-                return RedirectToAction(nameof(Index));
+                // Check if the user has already reacted to the entity
+                var existingReaction = await _dbContext.Reactions
+                    .FirstOrDefaultAsync(r => r.UserId == reaction.UserId && r.EntityId == reaction.EntityId);
+
+                if (existingReaction != null)
+                {
+                    reaction.CreationDate = DateTime.Now;
+                    // Update the existing reaction
+                    existingReaction.Type = reaction.Type;
+                    _dbContext.Reactions.Update(existingReaction);
+                }
+                else
+                {
+                    // Insert a new reaction
+                    reaction.CreationDate = DateTime.Now;
+                    _dbContext.Reactions.Add(reaction);
+                }
+
+                await _dbContext.SaveChangesAsync();
+                return Ok(); // Return success response
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        // GET: ReactionController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: ReactionController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: ReactionController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: ReactionController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
     }
 }

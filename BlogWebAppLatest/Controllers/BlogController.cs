@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.Design;
 using System.Drawing.Printing;
 using X.PagedList;
 
@@ -26,12 +27,12 @@ namespace BlogWebApp.Controllers
         public IActionResult Index(int? page, string sortOrder)
         {
             // Get the current user
-            var user = _userManager.GetUserAsync(User).Result;
-            if (user == null)
-            {
-                // Handle case when user is not found
-                return NotFound();
-            }
+            //var user = _userManager.GetUserAsync(User).Result;
+            //if (user == null)
+            //{
+            //    // Handle case when user is not found
+            //    return NotFound();
+            //}
 
             // Define default sorting order
             ViewData["CurrentSort"] = sortOrder;
@@ -42,7 +43,7 @@ namespace BlogWebApp.Controllers
             // Determine sorting logic based on sortOrder
             var userBlogsQuery = from blog in _dbContext.Blogs
                                  join category in _dbContext.BlogCategories on blog.BlogCategoryId equals category.Id
-                                 where blog.AuthorId == Guid.Parse(user.Id) // Filter blogs by AuthorId
+                                 /*where blog.AuthorId == Guid.Parse(user.Id)*/ // Filter blogs by AuthorId
                                  select new BlogVM
                                  {
                                      Id = blog.Id,
@@ -87,11 +88,111 @@ namespace BlogWebApp.Controllers
             //return View();
         }
 
+        //[HttpGet("blog-details")]
+        //public IActionResult Details(string? id)
+        //{
+        //    var blogDetails = from blog in _dbContext.Blogs
+        //                      join category in _dbContext.BlogCategories
+        //                      on blog.BlogCategoryId equals category.Id
+        //                      join comment in _dbContext.Comments
+        //                      on blog.Id equals comment.BlogId
+        //                      where blog.Id == Guid.Parse(id)
+        //                      select new BlogDetailsVM
+        //                      {
+        //                          Id = blog.Id,
+        //                          Title = blog.Title,
+        //                          Body = blog.Body,
+        //                          BlogCategoryId = blog.BlogCategoryId,
+        //                          PublishedDate = blog.CreationAt,
+        //                          CategoryName = category.Name, // Populate the category name
+        //                          BlogImages = blog.BlogImages.Select(bi => new BlogImageVM
+        //                          {
+        //                              ImageName = bi.ImageName,
+        //                              Url = bi.Url
+        //                          })
+        //                          .ToList(),
+        //                          BlogComments = blog.Comments.Select(bc=> new BlogComments
+        //                          {
+        //                            CommentId= bc.Id,
+        //                            Content= bc.Content,
+        //                            CommentedBy= bc.CommentedBy,
+        //                            CreationDate= bc.CreationDate
+        //                          }).ToList(),
+        //                          TotalComments = _dbContext.Comments.Count(c => c.BlogId == blog.Id),
+        //                          TotalUpvote = _dbContext.Reactions.Count(r => r.EntityId == blog.Id && r.Type == "Upvote"),
+        //                          TotalDownvote = _dbContext.Reactions.Count(r => r.EntityId == blog.Id && r.Type == "Downvote"),
+        //                      };
+        //    blogDetails.FirstOrDefault();
+
+        //    return View(blogDetails as BlogDetailsVM);
+        //}
+
         [HttpGet("blog-details")]
-        public IActionResult Details()
+        public IActionResult Details(string? id)
         {
-            return View();
+            if (id == null || !Guid.TryParse(id, out Guid blogId))
+            {
+                // Handle invalid or missing blog id
+                return RedirectToAction("Error", "Home"); // Redirect to an error page or another action
+            }
+
+            var blogDetails = _dbContext.Blogs
+                .Where(blog => blog.Id == blogId)
+                .Join(_dbContext.BlogCategories,
+                      blog => blog.BlogCategoryId,
+                      category => category.Id,
+                      (blog, category) => new { Blog = blog, Category = category })
+                .GroupJoin(_dbContext.Comments,
+                           bc => bc.Blog.Id,
+                           comment => comment.BlogId,
+                           (bc, comments) => new BlogDetailsVM
+                           {
+                               Id = bc.Blog.Id,
+                               Title = bc.Blog.Title,
+                               Body = bc.Blog.Body,
+                               BlogCategoryId = bc.Blog.BlogCategoryId,
+                               PublishedDate = bc.Blog.CreationAt,
+                               CategoryName = bc.Category.Name, // Populate the category name
+                               BlogImages = bc.Blog.BlogImages.Select(bi => new BlogImageVM
+                               {
+                                   ImageName = bi.ImageName,
+                                   Url = bi.Url
+                               }).ToList(),
+                               BlogComments = comments.Select(comment => new BlogComments
+                               {
+                                   CommentId = comment.Id,
+                                   Content = comment.Content,
+                                   CommentedBy = comment.CommentedBy,
+                                   CreationDate = comment.CreationDate
+                               }).ToList(),
+                               TotalComments = comments.Count(),
+                               TotalUpvote = _dbContext.Reactions.Count(r => r.EntityId == bc.Blog.Id && r.Type == "Upvote"),
+                               TotalDownvote = _dbContext.Reactions.Count(r => r.EntityId == bc.Blog.Id && r.Type == "Downvote")
+                           })
+                .FirstOrDefault();
+
+            var user = _userManager.GetUserAsync(User).Result;
+            blogDetails.IsVoted = false;
+            if (user != null)
+            {
+                var reaction = _dbContext.Reactions.FirstOrDefault(x=>x.UserId == Guid.Parse(user.Id) && x.EntityId == Guid.Parse(id) );
+                if (reaction != null)
+                {
+                    blogDetails.IsVoted = true;
+                    blogDetails.VoteType = reaction.Type;
+                }
+            }
+
+
+            if (blogDetails == null)
+            {
+                // Handle the case where no blog is found with the provided id
+                return RedirectToAction("NotFound", "Home"); // Redirect to a not found page or another action
+            }
+
+            return View(blogDetails);
         }
+
 
         [HttpGet("addblog")]
         public IActionResult AddBlog()
@@ -180,7 +281,6 @@ namespace BlogWebApp.Controllers
             return View(model);
         }
 
-
         [HttpPost]
         public async Task<IActionResult> AddBlog(BlogVM model)
         {
@@ -249,65 +349,45 @@ namespace BlogWebApp.Controllers
             return RedirectToAction("Index", "Home"); // Redirect to home page or any other page after removal
         }
 
-        [HttpGet("manageblog")]
-        public IActionResult GetAllBlog(int? page, string sortOrder)
+        [HttpGet("blogs/popularblogs")]
+        public IActionResult GetPopularAndRecentPosts()
         {
-            // Get the current user
-            var user = _userManager.GetUserAsync(User).Result;
-            if (user == null)
+            var popularPosts = _dbContext.Blogs
+                .Select(blog => new
+                {
+                    Blog = blog,
+                    Title= blog.Title,
+                    Id = blog.Id,
+                    PublishedDate = blog.CreationAt,
+                    UpvoteCount = _dbContext.Reactions.Count(r => r.EntityId == blog.Id && r.Type == "Upvote"),
+                    CommentCount = _dbContext.Comments.Count(c => c.BlogId == blog.Id),
+                    BlogImage = blog.BlogImages.FirstOrDefault()
+                })
+                .OrderByDescending(post => post.UpvoteCount + post.CommentCount)
+                .Take(10)
+                .ToList();
+
+            var recentPosts = _dbContext.Blogs
+                .Select(blog => new
+                {
+                    Blog = blog,
+                    Title = blog.Title,
+                    Id= blog.Id,
+                    PublishedDate =blog.CreationAt,
+                    BlogImage = blog.BlogImages.FirstOrDefault() // Select only the first blog image
+                })
+                .OrderByDescending(blog => blog.PublishedDate)
+                .Take(10)
+                .ToList();
+
+            var result = new
             {
-                // Handle case when user is not found
-                return NotFound();
-            }
+                PopularPosts = popularPosts,
+                RecentPosts = recentPosts
+            };
 
-            // Define default sorting order
-            ViewData["CurrentSort"] = sortOrder;
-            ViewData["RandomSortParam"] = String.IsNullOrEmpty(sortOrder) ? "random_desc" : "";
-            ViewData["PopularitySortParam"] = sortOrder == "Popularity" ? "popularity_desc" : "Popularity";
-            ViewData["RecencySortParam"] = sortOrder == "Recency" ? "recency_desc" : "Recency";
-
-            // Determine sorting logic based on sortOrder
-            var userBlogsQuery = from blog in _dbContext.Blogs
-                                 join category in _dbContext.BlogCategories on blog.BlogCategoryId equals category.Id
-                                 where blog.AuthorId == Guid.Parse(user.Id) // Filter blogs by AuthorId
-                                 select new BlogVM
-                                 {
-                                     Id = blog.Id,
-                                     Title = blog.Title,
-                                     Body = blog.Body,
-                                     BlogCategoryId = blog.BlogCategoryId,
-                                     PublishedDate = blog.CreationAt,
-                                     CategoryName = category.Name, // Populate the category name
-                                     BlogImages = blog.BlogImages.Select(bi => new BlogImageVM
-                                     {
-                                         ImageName = bi.ImageName,
-                                         Url = bi.Url
-                                     }).ToList(),
-                                     TotalComments = _dbContext.Comments.Count(c => c.BlogId == blog.Id),
-                                     TotalUpvote = _dbContext.Reactions.Count(r=>r.EntityId == blog.Id && r.Type== "Upvote"),
-                                     TotalDownvote = _dbContext.Reactions.Count(r=>r.EntityId == blog.Id && r.Type== "Downvote"),
-                                 };
-
-            switch (sortOrder)
-            {
-                case "random_desc":
-                    userBlogsQuery = userBlogsQuery.OrderBy(x => Guid.NewGuid()); // Order randomly
-                    break;
-                case "Popularity":
-                    // Implement popularity sorting logic
-                    break;
-                case "Recency":
-                    userBlogsQuery = userBlogsQuery.OrderByDescending(x => x.PublishedDate); // Order by recency
-                    break;
-                default:
-                    userBlogsQuery = userBlogsQuery.OrderByDescending(x => x.PublishedDate); // Default: order by recency
-                    break;
-            }
-
-            int pageSize = 2;
-            var userBlogs = userBlogsQuery.ToPagedList(page ?? 1, pageSize); // Convert to paged list
-
-            return View(userBlogs); // Pass userBlogs to the view
+            return Json(result);
         }
+
     }
 }

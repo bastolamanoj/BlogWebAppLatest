@@ -30,7 +30,7 @@ namespace BlogWebApp.Controllers
             dashboardData.TotalDownvotes = _dbContext.Reactions.Count(a => a.Type == "Downvote");
             dashboardData.TotalComments = _dbContext.Comments.Count();
 
-            dashboardData.PopularBloggers = _dbContext.Blogs
+            dashboardData.PopularBlogPosts = _dbContext.Blogs
              .OrderByDescending(post => post.Comments.Count)
             .ThenByDescending(post => post.Reactions.Count)
             .Take(10)
@@ -38,7 +38,7 @@ namespace BlogWebApp.Controllers
             {
                 Title = post.Title,
                 Body = post.Body,
-                PublishedDate = post.CreationAt,
+                PublishedDate = post.CreationAt
                 //ImageUrl = post.BlogImages.FirstOrDefault()
             })
             .ToList();

@@ -146,6 +146,47 @@ namespace BlogWebApp.Migrations
                     b.ToTable("Comments", "dbo");
                 });
 
+            modelBuilder.Entity("BlogWebApp.Models.CommentReply", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AuthorId1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("CommentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("CommentReplyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ParentReplyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId1");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("CommentReplyId");
+
+                    b.ToTable("CommentReplies", "dbo");
+                });
+
             modelBuilder.Entity("BlogWebApp.Models.IdentityModel.Role", b =>
                 {
                     b.Property<string>("Id")
@@ -524,6 +565,27 @@ namespace BlogWebApp.Migrations
                     b.Navigation("Blog");
                 });
 
+            modelBuilder.Entity("BlogWebApp.Models.CommentReply", b =>
+                {
+                    b.HasOne("BlogWebApp.Models.IdentityModel.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId1");
+
+                    b.HasOne("BlogWebApp.Models.Comment", "comment")
+                        .WithMany()
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BlogWebApp.Models.CommentReply", null)
+                        .WithMany("ChildReplies")
+                        .HasForeignKey("CommentReplyId");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("comment");
+                });
+
             modelBuilder.Entity("BlogWebApp.Models.IdentityModel.RoleClaim", b =>
                 {
                     b.HasOne("BlogWebApp.Models.IdentityModel.Role", null)
@@ -634,6 +696,11 @@ namespace BlogWebApp.Migrations
             modelBuilder.Entity("BlogWebApp.Models.Comment", b =>
                 {
                     b.Navigation("Reactions");
+                });
+
+            modelBuilder.Entity("BlogWebApp.Models.CommentReply", b =>
+                {
+                    b.Navigation("ChildReplies");
                 });
 #pragma warning restore 612, 618
         }
