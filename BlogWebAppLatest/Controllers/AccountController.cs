@@ -114,11 +114,13 @@ namespace BlogWebApp.Controllers
                     }
 
                     await _signInManager.SignInAsync(user, false);
+                    TempData["SuccessMessage"] = "Your account has been created.";
                     return RedirectToAction("Index", "Blog");
                 }
                
                 foreach(var error in result.Errors)
                 {
+                    TempData["ErrorMessage"] = "Railed to created account";
                     ModelState.AddModelError("", error.Description);
                 }
             }
@@ -164,7 +166,8 @@ namespace BlogWebApp.Controllers
         [HttpGet("admin")]
         public async Task<IActionResult> ManageAdmin()
         {
-            return View(await _dbcontext.Users.ToListAsync());
+            //_roleManager
+            return View( await _userManager.GetUsersInRoleAsync("Admin"));
         }
 
         [HttpGet("register")]

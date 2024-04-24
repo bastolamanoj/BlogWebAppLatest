@@ -6,30 +6,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BlogWebApp.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedRequiredModelConfig : Migration
+    public partial class initiazealltable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
                 name: "dbo");
-
-            migrationBuilder.CreateTable(
-                name: "BlogCategories",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BlogCategories", x => x.Id);
-                });
 
             migrationBuilder.CreateTable(
                 name: "Roles",
@@ -54,6 +37,12 @@ namespace BlogWebApp.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Bio = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Position = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProfileUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -245,30 +234,27 @@ namespace BlogWebApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BlogBlogCategory",
+                name: "BlogCategories",
                 schema: "dbo",
                 columns: table => new
                 {
-                    BlogCategoriesId = table.Column<int>(type: "int", nullable: false),
-                    BlogsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    BlogId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BlogBlogCategory", x => new { x.BlogCategoriesId, x.BlogsId });
+                    table.PrimaryKey("PK_BlogCategories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BlogBlogCategory_BlogCategories_BlogCategoriesId",
-                        column: x => x.BlogCategoriesId,
-                        principalSchema: "dbo",
-                        principalTable: "BlogCategories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_BlogBlogCategory_Blogs_BlogsId",
-                        column: x => x.BlogsId,
+                        name: "FK_BlogCategories_Blogs_BlogId",
+                        column: x => x.BlogId,
                         principalSchema: "dbo",
                         principalTable: "Blogs",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -359,6 +345,38 @@ namespace BlogWebApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CommentReplies",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CommentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ParentReplyId = table.Column<int>(type: "int", nullable: true),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AuthorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AuthorId1 = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CommentReplies", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CommentReplies_Comments_CommentId",
+                        column: x => x.CommentId,
+                        principalSchema: "dbo",
+                        principalTable: "Comments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CommentReplies_Users_AuthorId1",
+                        column: x => x.AuthorId1,
+                        principalSchema: "dbo",
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Reactions",
                 schema: "dbo",
                 columns: table => new
@@ -398,10 +416,10 @@ namespace BlogWebApp.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BlogBlogCategory_BlogsId",
+                name: "IX_BlogCategories_BlogId",
                 schema: "dbo",
-                table: "BlogBlogCategory",
-                column: "BlogsId");
+                table: "BlogCategories",
+                column: "BlogId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BlogImages_BlogId",
@@ -414,6 +432,18 @@ namespace BlogWebApp.Migrations
                 schema: "dbo",
                 table: "Blogs",
                 column: "AuthorId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CommentReplies_AuthorId1",
+                schema: "dbo",
+                table: "CommentReplies",
+                column: "AuthorId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CommentReplies_CommentId",
+                schema: "dbo",
+                table: "CommentReplies",
+                column: "CommentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comments_AuthorId",
@@ -514,11 +544,15 @@ namespace BlogWebApp.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "BlogBlogCategory",
+                name: "BlogCategories",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
                 name: "BlogImages",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "CommentReplies",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -551,10 +585,6 @@ namespace BlogWebApp.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserTokens",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "BlogCategories",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

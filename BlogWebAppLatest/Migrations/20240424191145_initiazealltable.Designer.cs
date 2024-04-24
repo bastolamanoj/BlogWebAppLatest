@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogWebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240422031440_UpadatedBlogcategory")]
-    partial class UpadatedBlogcategory
+    [Migration("20240424191145_initiazealltable")]
+    partial class initiazealltable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -149,6 +149,42 @@ namespace BlogWebApp.Migrations
                     b.ToTable("Comments", "dbo");
                 });
 
+            modelBuilder.Entity("BlogWebApp.Models.CommentReply", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AuthorId1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("CommentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ParentReplyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId1");
+
+                    b.HasIndex("CommentId");
+
+                    b.ToTable("CommentReplies", "dbo");
+                });
+
             modelBuilder.Entity("BlogWebApp.Models.IdentityModel.Role", b =>
                 {
                     b.Property<string>("Id")
@@ -213,8 +249,20 @@ namespace BlogWebApp.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DisplayName")
@@ -226,6 +274,10 @@ namespace BlogWebApp.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -249,6 +301,14 @@ namespace BlogWebApp.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Position")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProfileUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -525,6 +585,23 @@ namespace BlogWebApp.Migrations
                     b.Navigation("Author");
 
                     b.Navigation("Blog");
+                });
+
+            modelBuilder.Entity("BlogWebApp.Models.CommentReply", b =>
+                {
+                    b.HasOne("BlogWebApp.Models.IdentityModel.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId1");
+
+                    b.HasOne("BlogWebApp.Models.Comment", "comment")
+                        .WithMany()
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("comment");
                 });
 
             modelBuilder.Entity("BlogWebApp.Models.IdentityModel.RoleClaim", b =>

@@ -130,6 +130,16 @@
   <!-- Template Main JS File -->
   <script src="~/assets/js/main.js"></script>
 
+    <link href="~/toastr/css/toastr.css" rel="stylesheet" />
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/toastr/js/toastr.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            toastr("success", "success");
+        }
+    </script>
+
 </body>
 
 </html>

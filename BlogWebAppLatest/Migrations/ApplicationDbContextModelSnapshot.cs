@@ -163,9 +163,6 @@ namespace BlogWebApp.Migrations
                     b.Property<Guid>("CommentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("CommentReplyId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -181,8 +178,6 @@ namespace BlogWebApp.Migrations
                     b.HasIndex("AuthorId1");
 
                     b.HasIndex("CommentId");
-
-                    b.HasIndex("CommentReplyId");
 
                     b.ToTable("CommentReplies", "dbo");
                 });
@@ -251,8 +246,18 @@ namespace BlogWebApp.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DisplayName")
@@ -264,6 +269,9 @@ namespace BlogWebApp.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Gender")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -287,6 +295,12 @@ namespace BlogWebApp.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Position")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProfileUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -577,10 +591,6 @@ namespace BlogWebApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BlogWebApp.Models.CommentReply", null)
-                        .WithMany("ChildReplies")
-                        .HasForeignKey("CommentReplyId");
-
                     b.Navigation("Author");
 
                     b.Navigation("comment");
@@ -696,11 +706,6 @@ namespace BlogWebApp.Migrations
             modelBuilder.Entity("BlogWebApp.Models.Comment", b =>
                 {
                     b.Navigation("Reactions");
-                });
-
-            modelBuilder.Entity("BlogWebApp.Models.CommentReply", b =>
-                {
-                    b.Navigation("ChildReplies");
                 });
 #pragma warning restore 612, 618
         }

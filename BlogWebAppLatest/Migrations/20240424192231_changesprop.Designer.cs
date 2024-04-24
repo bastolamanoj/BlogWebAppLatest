@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogWebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240421170151_AddedRequiredModelConfig")]
-    partial class AddedRequiredModelConfig
+    [Migration("20240424192231_changesprop")]
+    partial class changesprop
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,25 +21,10 @@ namespace BlogWebApp.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("dbo")
-                .HasAnnotation("ProductVersion", "8.0.2")
+                .HasAnnotation("ProductVersion", "8.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("BlogBlogCategory", b =>
-                {
-                    b.Property<int>("BlogCategoriesId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("BlogsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("BlogCategoriesId", "BlogsId");
-
-                    b.HasIndex("BlogsId");
-
-                    b.ToTable("BlogBlogCategory", "dbo");
-                });
 
             modelBuilder.Entity("BlogWebApp.Models.Blog", b =>
                 {
@@ -85,6 +70,9 @@ namespace BlogWebApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid?>("BlogId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -99,6 +87,8 @@ namespace BlogWebApp.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BlogId");
 
                     b.ToTable("BlogCategories", "dbo");
                 });
@@ -157,6 +147,42 @@ namespace BlogWebApp.Migrations
                     b.HasIndex("BlogId");
 
                     b.ToTable("Comments", "dbo");
+                });
+
+            modelBuilder.Entity("BlogWebApp.Models.CommentReply", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AuthorId1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("CommentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ParentReplyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId1");
+
+                    b.HasIndex("CommentId");
+
+                    b.ToTable("CommentReplies", "dbo");
                 });
 
             modelBuilder.Entity("BlogWebApp.Models.IdentityModel.Role", b =>
@@ -223,8 +249,18 @@ namespace BlogWebApp.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DisplayName")
@@ -236,6 +272,9 @@ namespace BlogWebApp.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Gender")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -259,6 +298,12 @@ namespace BlogWebApp.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Position")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProfileUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -493,21 +538,6 @@ namespace BlogWebApp.Migrations
                     b.ToTable("UserDetails", "dbo");
                 });
 
-            modelBuilder.Entity("BlogBlogCategory", b =>
-                {
-                    b.HasOne("BlogWebApp.Models.BlogCategory", null)
-                        .WithMany()
-                        .HasForeignKey("BlogCategoriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BlogWebApp.Models.Blog", null)
-                        .WithMany()
-                        .HasForeignKey("BlogsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("BlogWebApp.Models.Blog", b =>
                 {
                     b.HasOne("BlogWebApp.Models.IdentityModel.User", "Author")
@@ -515,6 +545,13 @@ namespace BlogWebApp.Migrations
                         .HasForeignKey("AuthorId1");
 
                     b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("BlogWebApp.Models.BlogCategory", b =>
+                {
+                    b.HasOne("BlogWebApp.Models.Blog", null)
+                        .WithMany("BlogCategories")
+                        .HasForeignKey("BlogId");
                 });
 
             modelBuilder.Entity("BlogWebApp.Models.BlogImage", b =>
@@ -543,6 +580,23 @@ namespace BlogWebApp.Migrations
                     b.Navigation("Author");
 
                     b.Navigation("Blog");
+                });
+
+            modelBuilder.Entity("BlogWebApp.Models.CommentReply", b =>
+                {
+                    b.HasOne("BlogWebApp.Models.IdentityModel.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId1");
+
+                    b.HasOne("BlogWebApp.Models.Comment", "comment")
+                        .WithMany()
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("comment");
                 });
 
             modelBuilder.Entity("BlogWebApp.Models.IdentityModel.RoleClaim", b =>
@@ -643,6 +697,8 @@ namespace BlogWebApp.Migrations
 
             modelBuilder.Entity("BlogWebApp.Models.Blog", b =>
                 {
+                    b.Navigation("BlogCategories");
+
                     b.Navigation("BlogImages");
 
                     b.Navigation("Comments");

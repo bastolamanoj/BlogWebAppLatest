@@ -15,29 +15,26 @@ namespace BlogWebApp.Controllers
             _dbcontext = dbcontext;  
             _userManager= userManager;
         }  
-        //public IActionResult Index()
-        //{
-        //    return View();
-        //}
+ 
         [HttpPost]
-        public  async Task<ActionResult> AddNestedReply(Guid commentId, int parentReplyId, string replyContent)
+        public  async Task<ActionResult> AddNestedReply([FromBody] CommentReply commentReply)
         {
             var user = await _userManager.GetUserAsync(User);
             var userid = user.Id;
             // Create a new reply object
             var reply = new CommentReply
             {
-                Content = replyContent,
-                CommentId = commentId,
-                ParentReplyId = parentReplyId,
-                AuthorId = Guid.Parse(userid), // Assuming you have a way to get the current user's ID
+                Content = commentReply.Content,
+                CommentId = commentReply.CommentId,
+                //ParentReplyId = 0,
+                AuthorId = Guid.Parse(userid), 
                 Timestamp = DateTime.Now
             };
 
             // Save the reply to the database
-            _dbcontext.Replies.Add(reply);
+            _dbcontext.CommentReplies.Add(reply);
             _dbcontext.SaveChanges();
-            return Json(new { status = "success", message = "Reply added successfully" });
+            return Ok(new { status = "success", message = "Reply added successfully" });
             // Redirect the user back to the blog details page or return JSON response indicating success
         }
 

@@ -163,13 +163,30 @@ namespace BlogWebApp.Controllers
                                    CommentId = comment.Id,
                                    Content = comment.Content,
                                    CommentedBy = comment.CommentedBy,
-                                   CreationDate = comment.CreationDate
+                                   CreationDate = comment.CreationDate,
+                                   //UserName = _dbContext.Users.Where(a => Guid.Parse(a.Id) == comment.CommentedBy).Select(u => u.UserName).FirstOrDefault(),
+                                   CommentReplies =  _dbContext.CommentReplies
+                                    .Where(reply => reply.CommentId == comment.Id)
+                                    .Select(reply => new CommentReplyVm
+                                    {
+                                        Id = reply.Id,
+                                        Content = reply.Content,
+                                        CommentId = reply.CommentId,
+                                        Timestamp = reply.Timestamp,
+                                        AuthorId= reply.AuthorId,
+                                        //UserName= _dbContext.Users.Where(a=> Guid.Parse(a.Id) == reply.AuthorId).Select(u=> u.UserName).FirstOrDefault()
+
+                                    }).ToList()
                                }).ToList(),
                                TotalComments = comments.Count(),
                                TotalUpvote = _dbContext.Reactions.Count(r => r.EntityId == bc.Blog.Id && r.Type == "Upvote"),
                                TotalDownvote = _dbContext.Reactions.Count(r => r.EntityId == bc.Blog.Id && r.Type == "Downvote")
                            })
                 .FirstOrDefault();
+
+            //blogDetails.BlogComments.ForEach(comment=> new);
+            //var commentReplies = _dbContext.CommentReplies.Where(x => x.CommentId == comment.Id).ToList()
+
 
             var user = _userManager.GetUserAsync(User).Result;
             blogDetails.IsVoted = false;
@@ -197,12 +214,6 @@ namespace BlogWebApp.Controllers
         [HttpGet("addblog")]
         public IActionResult AddBlog()
         {
-            //var categories = new List<BlogCategory>
-            //    {
-            //        new BlogCategory { Id = 1, Name = "Category 1" },
-            //        new BlogCategory { Id = 2, Name = "Category 2" },
-            //        new BlogCategory { Id = 3, Name = "Category 3" }
-            //    };
             var categories = _dbContext.BlogCategories.ToList();
             ViewBag.Categories = new SelectList(categories, "Id", "Name");
             return View();
@@ -219,7 +230,7 @@ namespace BlogWebApp.Controllers
                 // Handle case when user is not found
                 return NotFound();
             }
-            int pageSize = 2;
+            int pageSize = 10;
 
             // Retrieve all blogs of the current user including their blog images
             // Define the query to retrieve blogs of the current user including their category details
@@ -312,14 +323,21 @@ namespace BlogWebApp.Controllers
                     _dbContext.BlogImages.Add(blogImage);
                 }
                 await _dbContext.SaveChangesAsync();
+                return RedirectToAction("manageblog", new { page = 1 });
 
             }
             return View(model);
         }
 
-        [HttpPost("RemoveBlog/{id}")]
-        public async Task<IActionResult> RemoveBlog(Guid id)
+        ////[HttpPost("RemoveBlog/{id}")]
+        //[HttpPost, ActionName("RemoveBlog")]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveBlog(Guid? id)
         {
+            if (id == null)
+            {
+                return NotFound();
+            }
             // Find the blog by its ID
             var blog = await _dbContext.Blogs.FindAsync(id);
 
@@ -346,39 +364,35 @@ namespace BlogWebApp.Controllers
 
             await _dbContext.SaveChangesAsync();
 
-            return RedirectToAction("Index", "Home"); // Redirect to home page or any other page after removal
+            return RedirectToAction("ManageBlog", "Blog"); // Redirect to home page or any other page after removal
         }
 
-        [HttpGet("blogs/popularblogs")]
+        [HttpGet]
         public IActionResult GetPopularAndRecentPosts()
         {
-            var popularPosts = _dbContext.Blogs
-                .Select(blog => new
-                {
-                    Blog = blog,
-                    Title= blog.Title,
-                    Id = blog.Id,
-                    PublishedDate = blog.CreationAt,
-                    UpvoteCount = _dbContext.Reactions.Count(r => r.EntityId == blog.Id && r.Type == "Upvote"),
-                    CommentCount = _dbContext.Comments.Count(c => c.BlogId == blog.Id),
-                    BlogImage = blog.BlogImages.FirstOrDefault()
-                })
-                .OrderByDescending(post => post.UpvoteCount + post.CommentCount)
-                .Take(10)
-                .ToList();
-
             var recentPosts = _dbContext.Blogs
-                .Select(blog => new
-                {
-                    Blog = blog,
-                    Title = blog.Title,
-                    Id= blog.Id,
-                    PublishedDate =blog.CreationAt,
-                    BlogImage = blog.BlogImages.FirstOrDefault() // Select only the first blog image
-                })
-                .OrderByDescending(blog => blog.PublishedDate)
-                .Take(10)
-                .ToList();
+            .OrderByDescending(blog => blog.CreationAt)
+            .Take(10)
+            .Select(blog => new
+            {
+                Id= blog.Id,
+                Title = blog.Title,
+                PublishedDate = blog.CreationAt,
+                BlogImage = blog.BlogImages.FirstOrDefault().Url 
+            })
+            .ToList();
+
+            var popularPosts = _dbContext.Blogs
+            .OrderByDescending(blog => blog.CreationAt)
+            .Take(10)
+            .Select(blog => new
+            {
+                Id = blog.Id,
+                Title = blog.Title,
+                PublishedDate = blog.CreationAt,
+                BlogImage = blog.BlogImages.FirstOrDefault().Url
+            })
+            .ToList();
 
             var result = new
             {
@@ -386,7 +400,7 @@ namespace BlogWebApp.Controllers
                 RecentPosts = recentPosts
             };
 
-            return Json(result);
+            return Ok(result);
         }
 
     }

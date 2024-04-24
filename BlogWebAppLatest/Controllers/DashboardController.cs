@@ -1,6 +1,8 @@
 ﻿using BlogWebApp.Models;
+using BlogWebApp.Models.IdentityModel;
 using BlogWebApp.ViewModel;
 using BlogWebAppLatest.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -12,11 +14,14 @@ namespace BlogWebApp.Controllers
     {
         private readonly ILogger<DashboardController> _logger;
         private readonly ApplicationDbContext _dbContext;
+        private readonly UserManager<User> _userManager; 
 
-        public DashboardController(ILogger<DashboardController> logger, ApplicationDbContext dbcontext)
+        public DashboardController(ILogger<DashboardController> logger, ApplicationDbContext dbcontext,
+            UserManager<User> userManager)
         {
             _logger = logger;
             _dbContext = dbcontext;
+            _userManager=   userManager;
         }
 
         [HttpGet("dashboard")]
@@ -67,6 +72,7 @@ namespace BlogWebApp.Controllers
 
         public IActionResult Profile()
         {
+
             return View();
         }
 
@@ -106,6 +112,47 @@ namespace BlogWebApp.Controllers
 
             return dashboardData;
         }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(EditUserViewModel viewModel)
+        {
+            //if (!ModelState.IsValid)
+            //{
+            //    return View(viewModel);
+            //}
+
+            var user = await _userManager.FindByIdAsync(viewModel.Id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.DisplayName = viewModel.UserName;
+            user.UserName = viewModel.Email;
+            user.Email = viewModel.Email;
+            user.PhoneNumber = viewModel.PhoneNumber;
+            user.Address = viewModel.Address;
+            user.Position = viewModel.Position;
+            user.Bio = viewModel.Bio;
+            user.Country = viewModel.Country;
+            user.ProfileUrl = viewModel.ProfileUrl;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                return RedirectToAction(nameof(Index)); // Redirect to a success page or action
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return null;
+        }
+
     }
 }
 
