@@ -11,7 +11,7 @@ using System.Diagnostics;
 namespace BlogWebApp.Controllers
 {
     public class DashboardController : Controller
-    {
+    { 
         private readonly ILogger<DashboardController> _logger;
         private readonly ApplicationDbContext _dbContext;
         private readonly UserManager<User> _userManager; 
@@ -118,15 +118,18 @@ namespace BlogWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditUserViewModel viewModel)
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    return View(viewModel);
-            //}
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Please Fill Required Field";
+                return View("profile");
+            }
 
             var user = await _userManager.FindByIdAsync(viewModel.Id);
             if (user == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Please Fill Required Field";
+                return RedirectToAction("profile");
+                //return NotFound();
             }
 
             user.DisplayName = viewModel.UserName;
@@ -142,12 +145,14 @@ namespace BlogWebApp.Controllers
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
-                return RedirectToAction(nameof(Index)); // Redirect to a success page or action
+                TempData["SuccessMessage"] = "User Details updated Successfully.";
+                return View("profile");
             }
 
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError("", error.Description);
+                return View("profile");
             }
 
             return null;
