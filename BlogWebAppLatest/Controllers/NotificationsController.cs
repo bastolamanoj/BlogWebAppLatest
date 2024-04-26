@@ -7,16 +7,21 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BlogWebApp.Models;
 using BlogWebAppLatest.Data;
+using BlogWebApp.ViewModel;
+using Microsoft.AspNetCore.Identity;
+using BlogWebApp.Models.IdentityModel;
 
 namespace BlogWebApp.Controllers
 {
     public class NotificationsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public NotificationsController(ApplicationDbContext context)
+        public NotificationsController(ApplicationDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Notifications
@@ -25,101 +30,32 @@ namespace BlogWebApp.Controllers
             var applicationDbContext = _context.Notifications.Include(n => n.Blog);
             return View(await applicationDbContext.ToListAsync());
         }
-
-        // GET: Notifications/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var notification = await _context.Notifications
-                .Include(n => n.Blog)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (notification == null)
-            {
-                return NotFound();
-            }
-
-            return View(notification);
-        }
-
-        // GET: Notifications/Create
-        public IActionResult Create()
-        {
-            ViewData["BlogId"] = new SelectList(_context.Blogs, "Id", "Body");
-            return View();
-        }
-
-        // POST: Notifications/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+       
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Body,UserId,BlogId,IsRead,CreatedAt,UpdatedAt")] Notification notification)
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([FromBody] NotificationVm notification)
         {
+            var user = _userManager.GetUserAsync(User).Result;
+            var userid = user.Id;
+            Notification noti = new Notification()
+            {
+                Title=notification.Title,
+                Body= notification.Body,
+                IsRead= false,
+                BlogId= notification.BlogId,
+                UserId = Guid.Parse(userid),
+                CreatedAt= DateTime.Now,
+                UpdatedAt= DateTime.Now,
+
+            };
             if (ModelState.IsValid)
             {
-                _context.Add(notification);
+                _context.Notifications.Add(noti);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                
             }
-            ViewData["BlogId"] = new SelectList(_context.Blogs, "Id", "Body", notification.BlogId);
-            return View(notification);
-        }
-
-        // GET: Notifications/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var notification = await _context.Notifications.FindAsync(id);
-            if (notification == null)
-            {
-                return NotFound();
-            }
-            ViewData["BlogId"] = new SelectList(_context.Blogs, "Id", "Body", notification.BlogId);
-            return View(notification);
-        }
-
-        // POST: Notifications/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Body,UserId,BlogId,IsRead,CreatedAt,UpdatedAt")] Notification notification)
-        {
-            if (id != notification.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(notification);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!NotificationExists(notification.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["BlogId"] = new SelectList(_context.Blogs, "Id", "Body", notification.BlogId);
-            return View(notification);
+            //ViewData["BlogId"] = new SelectList(_context.Blogs, "Id", "Body", notification.BlogId);
+            return Ok(new {status=200, message="success"});
         }
 
         // GET: Notifications/Delete/5
@@ -141,20 +77,38 @@ namespace BlogWebApp.Controllers
             return View(notification);
         }
 
-        // POST: Notifications/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        [HttpGet]
+        public IActionResult GetNotification()
         {
-            var notification = await _context.Notifications.FindAsync(id);
-            if (notification != null)
-            {
-                _context.Notifications.Remove(notification);
-            }
+            var currentuser = _userManager.GetUserAsync(User).Result;
+            var userid = currentuser.Id;
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            var notification = (from noti in _context.Notifications
+                                 join blog in _context.Blogs on noti.BlogId equals blog.Id
+                                 join user in _context.Users on noti.UserId.ToString() equals user.Id
+                                 where blog.AuthorId == Guid.Parse(userid) && user.Id == userid
+                                 select new NotificationVm
+                                 {
+                                     Title = noti.Title, // Assuming Notification entity has a Title property
+                                     Body = noti.Body,
+                                     Username = user.DisplayName,
+                                     Url= user.ProfileUrl,
+                                     BlogId=blog.Id,
+                                     NotificationDate = noti.CreatedAt
+
+                                 }).ToList();
+            var unreadNotificationCount = _context.Notifications
+                    .Where(noti => !noti.IsRead)
+                    .Count();
+
+            notification.FirstOrDefault().TotalNotification = unreadNotificationCount;
+            if (notification == null)
+            {
+                return NotFound();
+            }
+            return Ok(new { notification= notification });
         }
+
 
         private bool NotificationExists(int id)
         {

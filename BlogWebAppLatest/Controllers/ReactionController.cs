@@ -2,6 +2,7 @@
 using BlogWebApp.Models.IdentityModel;
 using BlogWebApp.ViewModel;
 using BlogWebAppLatest.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlogWebApp.Controllers
 {
+    [Authorize]
     public class ReactionController : Controller
     {
       private readonly ApplicationDbContext _dbContext;
@@ -68,5 +70,24 @@ namespace BlogWebApp.Controllers
             }
         }
 
+        [HttpDelete]
+        public async Task<IActionResult> DeleteReaction(Guid id)
+        {
+            var user = _userManager.GetUserAsync(User).Result;
+            var userid = user.Id;
+
+            var comment = 
+                _dbContext.Reactions.Where(x=>x.EntityId==id && x.UserId== Guid.Parse(userid)).FirstOrDefault();
+;
+            if (comment == null)
+            {
+                return NotFound("Comment not found.");
+            }
+
+                _dbContext.Reactions.Remove(comment);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(new { status = "200", message = "success" });
+        }
     }
 }

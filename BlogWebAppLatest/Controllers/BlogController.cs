@@ -1,14 +1,14 @@
-﻿using BlogWebApp.Models;
+﻿using BlogWebApp.Attributes;
+using BlogWebApp.Models;
 using BlogWebApp.Models.IdentityModel;
 using BlogWebApp.ViewModel;
 using BlogWebAppLatest.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.ComponentModel.Design;
-using System.Drawing.Printing;
+
 using X.PagedList;
 
 namespace BlogWebApp.Controllers
@@ -33,6 +33,7 @@ namespace BlogWebApp.Controllers
             //    // Handle case when user is not found
             //    return NotFound();
             //}
+            //throw new NotImplementedException();
 
             // Define default sorting order
             ViewData["CurrentSort"] = sortOrder;
@@ -51,7 +52,15 @@ namespace BlogWebApp.Controllers
                                      Body = blog.Body,
                                      BlogCategoryId = blog.BlogCategoryId,
                                      PublishedDate = blog.CreationAt,
-                                     CategoryName = category.Name, // Populate the category name
+                                     CategoryName = category.Name,
+                                     UserName = _dbContext.Users
+                                                    .Where(x => x.Id == blog.AuthorId.ToString())
+                                                    .Select(x => x.DisplayName)
+                                                    .FirstOrDefault(),
+                                     ProfileUrl = _dbContext.Users
+                                                    .Where(x => x.Id == blog.AuthorId.ToString())
+                                                    .Select(x => x.ProfileUrl)
+                                                    .FirstOrDefault(),
                                      BlogImages = blog.BlogImages.Select(bi => new BlogImageVM
                                      {
                                          ImageName = bi.ImageName,
@@ -71,7 +80,8 @@ namespace BlogWebApp.Controllers
                     userBlogsQuery = userBlogsQuery.OrderBy(x => Guid.NewGuid()); // Order randomly
                     break;
                 case "Popularity":
-                    // Implement popularity sorting logic
+                    userBlogsQuery = userBlogsQuery.OrderByDescending(x => x.TotalUpvote - x.TotalDownvote);
+                                      
                     break;
                 case "Recency":
                     userBlogsQuery = userBlogsQuery.OrderByDescending(x => x.PublishedDate); // Order by recency
@@ -136,6 +146,8 @@ namespace BlogWebApp.Controllers
                 return RedirectToAction("Error", "Home"); // Redirect to an error page or another action
             }
 
+            var user = _userManager.GetUserAsync(User).Result;
+
             var blogDetails = _dbContext.Blogs
                 .Where(blog => blog.Id == blogId)
                 .Join(_dbContext.BlogCategories,
@@ -164,6 +176,17 @@ namespace BlogWebApp.Controllers
                                    Content = comment.Content,
                                    CommentedBy = comment.CommentedBy,
                                    CreationDate = comment.CreationDate,
+                                   TotalUpvote = _dbContext.Reactions.Count(r => r.EntityId == comment.Id && r.Type == "Upvote"),
+                                   TotalDownvote = _dbContext.Reactions.Count(r => r.EntityId == comment.Id && r.Type == "Downvote"),
+                                   IsVoted = (_dbContext.Reactions.FirstOrDefault(x => x.UserId == bc.Blog.AuthorId && x.EntityId == Guid.Parse(id))) != null? true:false,
+                                   UserName = _dbContext.Users
+                                                    .Where(x => x.Id == comment.CommentedBy.ToString())
+                                                    .Select(x => x.DisplayName)
+                                                    .FirstOrDefault(),
+                                   Url = _dbContext.Users
+                                                    .Where(x => x.Id == comment.CommentedBy.ToString())
+                                                    .Select(x => x.DisplayName)
+                                                    .FirstOrDefault(),
                                    //UserName = _dbContext.Users.Where(a => Guid.Parse(a.Id) == comment.CommentedBy).Select(u => u.UserName).FirstOrDefault(),
                                    CommentReplies =  _dbContext.CommentReplies
                                     .Where(reply => reply.CommentId == comment.Id)
@@ -174,9 +197,18 @@ namespace BlogWebApp.Controllers
                                         CommentId = reply.CommentId,
                                         Timestamp = reply.Timestamp,
                                         AuthorId= reply.AuthorId,
-                                        //UserName= _dbContext.Users.Where(a=> Guid.Parse(a.Id) == reply.AuthorId).Select(u=> u.UserName).FirstOrDefault()
+                                        UserName = _dbContext.Users
+                                                    .Where(x => x.Id == reply.AuthorId.ToString())
+                                                    .Select(x => x.DisplayName)
+                                                    .FirstOrDefault(),    
+                                        Url= _dbContext.Users
+                                                    .Where(x => x.Id == reply.AuthorId.ToString())
+                                                    .Select(x => x.DisplayName)
+                                                    .FirstOrDefault()
 
-                                    }).ToList()
+            //UserName= _dbContext.Users.Where(a=> Guid.Parse(a.Id) == reply.AuthorId).Select(u=> u.UserName).FirstOrDefault()
+
+        }).ToList()
                                }).ToList(),
                                TotalComments = comments.Count(),
                                TotalUpvote = _dbContext.Reactions.Count(r => r.EntityId == bc.Blog.Id && r.Type == "Upvote"),
@@ -187,8 +219,28 @@ namespace BlogWebApp.Controllers
             //blogDetails.BlogComments.ForEach(comment=> new);
             //var commentReplies = _dbContext.CommentReplies.Where(x => x.CommentId == comment.Id).ToList()
 
+            var bloguser = (from blog in _dbContext.Blogs
+                            join blogUser in _dbContext.Users
+                            on blog.AuthorId.ToString() equals blogUser.Id
+                            where blog.Id.ToString() == id
+                            select new UserVM
+                            {
+                                UserName = blogUser.DisplayName,
+                                Position = blogUser.Position,
+                                Bio = blogUser.Bio,
+                                ProfileUrl = blogUser.ProfileUrl,
+                                Address = blogUser.Address,
+                            }).FirstOrDefault();
 
-            var user = _userManager.GetUserAsync(User).Result;
+
+            blogDetails.BlogUser = bloguser as UserVM;
+
+            //blogDetails.BlogComments.ForEach(item =>
+            //new BlogComments { 
+            //    item.BlogId =item.BlogId
+            //});
+
+
             blogDetails.IsVoted = false;
             if (user != null)
             {
@@ -204,13 +256,13 @@ namespace BlogWebApp.Controllers
             if (blogDetails == null)
             {
                 // Handle the case where no blog is found with the provided id
-                return RedirectToAction("NotFound", "Home"); // Redirect to a not found page or another action
+                return RedirectToAction("Error", "Dashboard"); // Redirect to a not found page or another action
             }
 
             return View(blogDetails);
         }
 
-
+        [UserAuthorize]
         [HttpGet("addblog")]
         public IActionResult AddBlog()
         {
@@ -219,7 +271,7 @@ namespace BlogWebApp.Controllers
             return View();
         }
 
-
+        [UserAuthorize]
         [HttpGet("manageblog")]
         public IActionResult ManageBlog(int? page)
         {
@@ -258,6 +310,7 @@ namespace BlogWebApp.Controllers
             return View(userBlogs); // Pass userBlogs to the view
         }
 
+        [UserAuthorize]
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -292,6 +345,7 @@ namespace BlogWebApp.Controllers
             return View(model);
         }
 
+        [UserAuthorize]
         [HttpPost]
         public async Task<IActionResult> AddBlog(BlogVM model)
         {

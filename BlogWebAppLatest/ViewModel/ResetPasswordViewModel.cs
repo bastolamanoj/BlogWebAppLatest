@@ -4,9 +4,10 @@ namespace BlogWebApp.ViewModel
 {
     public class ResetPasswordViewModel
     {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+        public string? UserId { get; set; }
+        //[Required]
+        //[EmailAddress]
+        public string? Email { get; set; }
 
         [Required]
         [DataType(DataType.Password)]

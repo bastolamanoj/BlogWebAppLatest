@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BlogWebApp.Models;
 using BlogWebAppLatest.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BlogWebApp.Controllers
 {
-
+    [Authorize]
     public class BlogCategoryController : Controller
     {
         private readonly ApplicationDbContext _context;

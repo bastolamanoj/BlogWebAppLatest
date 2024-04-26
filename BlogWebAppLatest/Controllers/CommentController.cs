@@ -1,12 +1,14 @@
 ﻿using BlogWebApp.Models;
 using BlogWebApp.Models.IdentityModel;
 using BlogWebAppLatest.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogWebApp.Controllers
 {
+    [Authorize]
     public class CommentController : Controller
     {
         private readonly ApplicationDbContext _dbcontext;
@@ -84,7 +86,7 @@ namespace BlogWebApp.Controllers
             return Ok(new { status = "200", message = "success" });
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete]
         public async Task<IActionResult> DeleteComment(Guid id)
         {
             var comment = await _dbcontext.Comments.FindAsync(id);

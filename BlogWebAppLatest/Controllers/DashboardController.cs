@@ -1,15 +1,15 @@
-﻿using BlogWebApp.Models;
+﻿using BlogWebApp.Attributes;
+using BlogWebApp.Models;
 using BlogWebApp.Models.IdentityModel;
 using BlogWebApp.ViewModel;
 using BlogWebAppLatest.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
 
 namespace BlogWebApp.Controllers
 {
+    [UserAuthorize]
     public class DashboardController : Controller
     { 
         private readonly ILogger<DashboardController> _logger;
@@ -113,6 +113,93 @@ namespace BlogWebApp.Controllers
             return dashboardData;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetDashboardDataForBlogger(DateTime? month = null)
+        {
+            var dashboardData = new DashboardData();
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user.Id;
+            // Get all-time data if userId is not provided
+            if (string.IsNullOrEmpty(userId))
+            {
+                dashboardData.TotalBlogPosts = _dbContext.Blogs.Count();
+                dashboardData.TotalUpvotes = _dbContext.Reactions.Where(a => a.Type == "Upvote").Count();
+                dashboardData.TotalDownvotes = _dbContext.Reactions.Where(a => a.Type == "Downvote").Count();
+                dashboardData.TotalComments = _dbContext.Comments.Count();
+            }
+            else // Filter by userId if provided
+            {
+                // Filter by userId
+                var userBlogsQuery = _dbContext.Blogs.Where(blog => blog.AuthorId.ToString() == userId);
+
+                // Filter by month if provided
+                if (month.HasValue)
+                {
+                    var startOfMonth = new DateTime(month.Value.Year, month.Value.Month, 1);
+                    var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+
+                    userBlogsQuery = userBlogsQuery.Where(post => post.CreationAt >= startOfMonth && post.CreationAt <= endOfMonth);
+                }
+
+                // Calculate counts
+                dashboardData.TotalBlogPosts = userBlogsQuery.Count();
+                dashboardData.TotalUpvotes = _dbContext.Reactions.Where(a => a.Type == "Upvote" && a.UserId.ToString() == userId).Count();
+                dashboardData.TotalDownvotes = _dbContext.Reactions.Where(a => a.Type == "Downvote" && a.UserId.ToString() == userId).Count();
+                dashboardData.TotalComments = _dbContext.Comments.Count(comment => comment.CommentedBy.ToString() == userId);
+            }
+
+            return Ok(new { dashboardData= dashboardData });
+        }
+
+        [HttpGet]
+        public IActionResult GetTopBloggerUsers(DateTime? month = null)
+        {
+            var query = _dbContext.Users; // Directly accessing the Users table
+
+            if (month.HasValue)
+            {
+                var startOfMonth = new DateTime(month.Value.Year, month.Value.Month, 1);
+                var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+
+                query = (Microsoft.EntityFrameworkCore.DbSet<User>)query.OrderByDescending(u =>
+       _dbContext.Blogs.Count(b => b.AuthorId == Guid.Parse(u.Id) && b.CreationAt >= startOfMonth && b.CreationAt <= endOfMonth) +
+       _dbContext.Comments.Count(c => c.CommentedBy == Guid.Parse(u.Id) && c.CreationDate >= startOfMonth && c.CreationDate <= endOfMonth));
+            }
+            else
+            {
+                query = (Microsoft.EntityFrameworkCore.DbSet<User>)query.OrderByDescending(u =>
+                    _dbContext.Blogs.Count(b => b.AuthorId.ToString() == u.Id) +
+                    _dbContext.Comments.Count(c => c.CommentedBy == Guid.Parse(u.Id)));
+            }
+
+            var topUsers = query.Take(10).ToList();
+
+            return Ok(topUsers);
+
+        }
+
+        [HttpGet]
+        public IActionResult GetTopBlogs(DateTime? month = null)
+        {
+            var query = _dbContext.Blogs.AsQueryable();
+
+            if (month.HasValue)
+            {
+                var startOfMonth = new DateTime(month.Value.Year, month.Value.Month, 1);
+                var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+
+                query = query.Where(b => b.CreationAt >= startOfMonth && b.CreationAt <= endOfMonth);
+            }
+
+            var topBlogs = query.OrderByDescending(b =>
+                    (_dbContext.Reactions.Count(r => r.EntityId == b.Id && r.Type == "Upvote") -
+                    _dbContext.Reactions.Count(r => r.EntityId == b.Id && r.Type == "Downvote")) +
+                    _dbContext.Comments.Count(c => c.BlogId == b.Id))
+                .Take(10)
+                .ToList();
+
+            return Ok(topBlogs);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

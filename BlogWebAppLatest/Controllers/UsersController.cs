@@ -1,4 +1,5 @@
 ﻿using BlogWebAppLatest.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,11 +14,11 @@ namespace BlogWebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> EditProfileUrl(string profileUrl)
         {
             if (ModelState.IsValid)
             {
-                // Get the current user (you need to implement this part according to your authentication mechanism)
                 var currentUser = await _dbcontext.Users.FirstOrDefaultAsync(u => u.Email == User.Identity.Name);
 
                 if (currentUser != null)

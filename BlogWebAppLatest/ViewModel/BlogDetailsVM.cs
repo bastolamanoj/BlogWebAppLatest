@@ -22,8 +22,18 @@ namespace BlogWebApp.ViewModel
         public List<BlogImageVM> BlogImages { get; set; }
         public List<BlogReactions> BlogReactions { get; set; }
         public List<BlogComments> BlogComments { get; set; }
+        public UserVM BlogUser { get; set; }
 
     }
+    public class UserVM
+    {
+        public string? UserName { get; set; }
+        public string? ProfileUrl { get; set; }
+        public string? Bio { get; set; }
+        public string? Position { get; set; }
+        public string? Address { get; set; }
+    }
+
     //public class BlogImages
     //{
     //    public string? ImageName { get; set; }
@@ -42,8 +52,13 @@ namespace BlogWebApp.ViewModel
         public Guid CommentId { get; set; }
         public string Content { get; set; }
         public Guid BlogId { get; set; }
+        public Guid UseId { get; set; }
         public Guid CommentedBy { get; set; }
         public DateTime CreationDate { get; set; }
+        public int? TotalUpvote { get; set; }
+        public int? TotalDownvote { get; set; }
+        public string? VoteType { get; set; }
+        public bool? IsVoted { get; set; }
         public string UserName { get; set; }
         public string Url { get; set; }
         public List<CommentReplyVm> CommentReplies { get; set; }

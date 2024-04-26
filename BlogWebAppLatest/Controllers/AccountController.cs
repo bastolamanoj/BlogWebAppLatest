@@ -1,6 +1,7 @@
 ﻿using BlogWebApp.Models.IdentityModel;
 using BlogWebApp.ViewModel;
 using BlogWebAppLatest.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -34,10 +35,19 @@ namespace BlogWebApp.Controllers
         {
             return View();
         }
+        public IActionResult Index(string? aa)
+        {
+            return RedirectToAction("/");
+        }
 
+        [AllowAnonymous]
         [HttpGet("login")]
         public IActionResult Login()
         {
+            if (_signInManager.IsSignedIn(User))
+            {
+                return RedirectToAction("/"); 
+            }
             return View();
         }
 
@@ -78,6 +88,11 @@ namespace BlogWebApp.Controllers
             }
 
             return View(model);
+        }
+
+        public async Task<IActionResult> Login(string returnUrl)
+        {
+            return RedirectToAction("login");
         }
 
         [HttpPost]
@@ -136,7 +151,8 @@ namespace BlogWebApp.Controllers
                 {
                     DisplayName = model.Name,
                     UserName = model.Email,
-                    Email = model.Email
+                    Email = model.Email,
+                    Address=""
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -144,8 +160,8 @@ namespace BlogWebApp.Controllers
                 {
                     await _userManager.AddToRoleAsync(user, "Admin"); // Add user to the "Admin" role
 
-                    await _signInManager.SignInAsync(user, false);
-                    return RedirectToAction("Index", "Blog");
+                    //await _signInManager.SignInAsync(user, false);
+                    return RedirectToAction("manageadmin");
                 }
 
                 foreach (var error in result.Errors)
@@ -153,7 +169,11 @@ namespace BlogWebApp.Controllers
                     ModelState.AddModelError("", error.Description);
                 }
             }
-
+            else
+            {
+                ModelState.AddModelError("", "Validation Error");
+            }
+           
             return View(model);
         }
 
@@ -163,7 +183,7 @@ namespace BlogWebApp.Controllers
             return View();
         }
 
-        [HttpGet("admin")]
+        [HttpGet("manageadmin")]
         public async Task<IActionResult> ManageAdmin()
         {
             //_roleManager
@@ -173,6 +193,10 @@ namespace BlogWebApp.Controllers
         [HttpGet("register")]
         public IActionResult Register()
         {
+            if (_signInManager.IsSignedIn(User))
+            {
+                return RedirectToAction("/");
+            }
             return View();
         }
 
@@ -218,26 +242,40 @@ namespace BlogWebApp.Controllers
 
         }
 
+        [HttpGet]
+        public IActionResult ResetPassword(string userId, string code)
+        {
+            var model = new ResetPasswordViewModel
+            {
+                UserId = userId,
+                Code = code
+            };
+
+            return View(model);
+        }
+
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
             if (!ModelState.IsValid)
             {
+                TempData["ErrorMessage"] = "Validation Error.";
                 return View(model);
             }
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await _userManager.FindByIdAsync(model.UserId);
             if (user == null)
             {
-                // Don't reveal that the user does not exist
-                return RedirectToAction("ResetPasswordConfirmation");
+                TempData["ErrorMessage"] = "User Not Valid.";
+                return View(model);
             }
 
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
             if (result.Succeeded)
             {
-                return RedirectToAction("ResetPasswordConfirmation");
+                TempData["SuccessMessage"] = "Your Password has been reset successfully.";
+                return RedirectToAction("Login", "Account");
             }
 
             foreach (var error in result.Errors)
@@ -262,6 +300,11 @@ namespace BlogWebApp.Controllers
 
                     await _emailSender.SendEmailAsync(model.Email, "Reset Password",
                         $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                TempData["SuccessMessage"] = "Email Has been sent. please check your inbox";
+                }
+                else
+                {
+                TempData["ErrorMessage"] = "Your email doesn't match.";
                 }
 
                 //return RedirectToAction("ForgotPasswordConfirmation");
@@ -270,10 +313,11 @@ namespace BlogWebApp.Controllers
             return View(model);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteUser(string userId)
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(string? id)
         {
+            var userId = id;
             // Check if userId is null or empty
             if (string.IsNullOrEmpty(userId))
             {
@@ -294,7 +338,7 @@ namespace BlogWebApp.Controllers
             if (totalUsersCount <= 1)
             {
                 ModelState.AddModelError("", "Cannot delete the only user in the database.");
-                return RedirectToAction("AddAdmin", "Account");
+                return RedirectToAction("manageadmin", "Account");
             }
 
             // Remove the user from the database using the UserManager

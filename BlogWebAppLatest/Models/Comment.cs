@@ -15,6 +15,7 @@ namespace BlogWebApp.Models
 
         // Navigation property to access the blog associated with the comment
         public Blog Blog { get; set; }
+        //public string AuthorId { get; set; }
 
         // Navigation property to access the user who authored the comment
         public User Author { get; set; }

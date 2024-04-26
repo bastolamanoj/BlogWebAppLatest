@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing.Constraints;
 using System.IO;
 using BlogWebApp.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BlogWebApp.Controllers
 {
     //[Route("api/[controller]/[Action]")]
     //[ApiController]
+    [Authorize]
     public class FileController : Controller
     {
         private static IWebHostEnvironment _webHostEnvironment;

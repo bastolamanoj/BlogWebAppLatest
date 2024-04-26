@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BlogWebApp.Models;
 using BlogWebAppLatest.Data;
+using System.Security.Cryptography.Xml;
 
 namespace BlogWebApp.Controllers
 {
@@ -22,6 +23,7 @@ namespace BlogWebApp.Controllers
         // GET: Blogs
         public async Task<IActionResult> Index()
         {
+            throw new NotImplementedException();
             return View(await _context.Blogs.ToListAsync());
         }
 

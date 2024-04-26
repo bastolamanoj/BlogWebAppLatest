@@ -485,16 +485,16 @@ section {
     z-index: 9997;
   }
 
-  .navbar ul {
-    position: absolute;
-    inset: 0;
-    padding: 50px 0 10px 0;
-    margin: 0;
-    background: rgba(0, 131, 116, 0.9);
-    overflow-y: auto;
-    transition: 0.3s;
-    z-index: 9998;
-  }
+    .navbar ul {
+        position: absolute;
+        inset: 0;
+        padding: 50px 0 10px 0;
+        margin: 0;
+        background: var(--color-primary);
+        overflow-y: auto;
+        transition: 0.3s;
+        z-index: 9998;
+    }
 
   .navbar a,
   .navbar a:focus {
