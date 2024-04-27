@@ -4,7 +4,8 @@ namespace BlogWebApp.ViewModel
 {
     public class NotificationVm
     {
-        public string? Title { get; set; }   // This the Notification Title
+        public int? Id { get; set; }
+        public string? Title { get; set; }   // This the int Notification Title
         public string? Body { get; set; }
         public Guid UserId { get; set; } 
         public string? Username { get; set; }

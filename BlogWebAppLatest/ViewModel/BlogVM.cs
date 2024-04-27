@@ -6,6 +6,8 @@ namespace BlogWebApp.ViewModel
 {
     public class BlogVM
     {
+        
+         public int? SN { get; set; }
         public Guid Id { get; set; }
         [Required]
         public string Title { get; set; }

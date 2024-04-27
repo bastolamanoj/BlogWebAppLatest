@@ -128,9 +128,9 @@ namespace BlogWebApp.Controllers
                         //return new GeneralResponse(true, "Account Created.");
                     }
 
-                    await _signInManager.SignInAsync(user, false);
+                    //await _signInManager.SignInAsync(user, false);
                     TempData["SuccessMessage"] = "Your account has been created.";
-                    return RedirectToAction("Index", "Blog");
+                    return RedirectToAction("Login", "Account");
                 }
                
                 foreach(var error in result.Errors)
@@ -152,7 +152,9 @@ namespace BlogWebApp.Controllers
                     DisplayName = model.Name,
                     UserName = model.Email,
                     Email = model.Email,
-                    Address=""
+                    Address="",
+                    EmailConfirmed=true
+
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -315,6 +317,7 @@ namespace BlogWebApp.Controllers
 
         //[HttpPost]
         //[ValidateAntiForgeryToken]
+        //this method for deleting the admin user
         public async Task<IActionResult> DeleteUser(string? id)
         {
             var userId = id;
@@ -334,9 +337,19 @@ namespace BlogWebApp.Controllers
                 ModelState.AddModelError("", "User not found.");
                 //return NotFound("User not found.");
             }
-            var totalUsersCount = await _userManager.Users.CountAsync();
+
+            var totalUsersCount = await (
+               from users in _dbcontext.Users
+               join roleUser in _dbcontext.UserRoles on users.Id equals roleUser.UserId
+               join role in _dbcontext.Roles on roleUser.RoleId equals role.Id
+               where role.Name == "Admin"
+               select user
+            ).CountAsync();
+
+
             if (totalUsersCount <= 1)
             {
+                TempData["ErrorMessage"] = "Cannot delete the only admin.";
                 ModelState.AddModelError("", "Cannot delete the only user in the database.");
                 return RedirectToAction("manageadmin", "Account");
             }

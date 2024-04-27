@@ -80,35 +80,67 @@ namespace BlogWebApp.Controllers
         [HttpGet]
         public IActionResult GetNotification()
         {
-            var currentuser = _userManager.GetUserAsync(User).Result;
-            var userid = currentuser.Id;
+            var currentUser = _userManager.GetUserAsync(User).Result;
+            var userId = currentUser.Id;
 
-            var notification = (from noti in _context.Notifications
+            var notifications = (from noti in _context.Notifications
                                  join blog in _context.Blogs on noti.BlogId equals blog.Id
-                                 join user in _context.Users on noti.UserId.ToString() equals user.Id
-                                 where blog.AuthorId == Guid.Parse(userid) && user.Id == userid
+                                 join user in _context.Users on blog.AuthorId.ToString() equals user.Id
+                                 where blog.AuthorId == Guid.Parse(userId)
                                  select new NotificationVm
                                  {
-                                     Title = noti.Title, // Assuming Notification entity has a Title property
+                                     Id = noti.Id,
+                                     Title = noti.Title,
                                      Body = noti.Body,
                                      Username = user.DisplayName,
-                                     Url= user.ProfileUrl,
-                                     BlogId=blog.Id,
+                                     Url = user.ProfileUrl,
+                                     IsRead=noti.IsRead,
+                                     BlogId = blog.Id,
                                      NotificationDate = noti.CreatedAt
-
                                  }).ToList();
-            var unreadNotificationCount = _context.Notifications
-                    .Where(noti => !noti.IsRead)
-                    .Count();
 
-            notification.FirstOrDefault().TotalNotification = unreadNotificationCount;
-            if (notification == null)
+            var unreadNotificationCount = notifications
+                .Count(noti => !noti.IsRead);
+            if (notifications.Count() > 0)
+            {
+            notifications[0].TotalNotification = unreadNotificationCount;
+
+            }
+
+            if (notifications.Count() == 0)
             {
                 return NotFound();
             }
-            return Ok(new { notification= notification });
+
+            return Ok(new { notifications = notifications });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UdpateNotificationStaus([FromBody] List<int> notificationIds)
+        {
+            if (notificationIds == null || notificationIds.Count == 0)
+            {
+                return BadRequest("No notification IDs provided.");
+            }
+
+            //var notification= _context.Notifications.
+            foreach (var notificationId in notificationIds)
+            {
+                var notificationToUpdate = await _context.Notifications.FindAsync(notificationId);
+
+                if (notificationToUpdate != null)
+                {
+                    notificationToUpdate.IsRead = true;
+                    notificationToUpdate.UpdatedAt = DateTime.Now;
+
+                    _context.Notifications.Update(notificationToUpdate);
+                }
+            }
+            await _context.SaveChangesAsync();
+
+            return Ok(new { status = 200, message = "Notifications updated successfully" });
+
+        }
 
         private bool NotificationExists(int id)
         {

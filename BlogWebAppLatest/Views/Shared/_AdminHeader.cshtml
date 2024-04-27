@@ -36,7 +36,7 @@
 
             <li class="nav-item dropdown">
 
-                <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
+                <a class="nav-link nav-icon notificationBell" role="button" data-bs-toggle="dropdown">
                     <i class="bi bi-bell"></i>
                     <span class="badge bg-danger badge-number">0  </span>
                 </a><!-- End Notification Icon -->
@@ -118,11 +118,11 @@
                         </a>
                     </li>
 
-                </ul><!-- End Profile Dropdown Items -->
-            </li><!-- End Profile Nav -->
+                </ul> @* sfsd *@
+            </li>  @* End Profile Nav *@
             }
         </ul>
-    </nav><!-- End Icons Navigation -->
+    </nav> 
 
 </header><!-- End Header -->
 
@@ -136,10 +136,11 @@
             url: '/Notifications/GetNotification', 
             type: 'GET',
             success: function (data) {
-                renderPosts(data.notification, '.notifications');
+                renderPosts(data.notifications, '.notifications');
             },
             error: function (xhr, status, error) {
                 // Handle error
+                $(".badge-number").text(0);
                 console.error('Error fetching popular and TotalNotification posts:', error);
             }
         });
@@ -147,14 +148,15 @@
       
             var $container = $(containerSelector);
             $container.empty();
-            $(".badge-number").text(1);
+            $(".badge-number").text(posts[0].totalNotification);
+
             $.each(posts, function (index, post) {
                 console.log(post);
                 console.log(posts);
                 var postHtml = `
-                        <li class="notification-item">
+                            <li class="notification-item" id="${post.id}">
                                <a href="/blog-details?id=${post.blogId}">
-                                       <img src="/Uploads/${post.url}" alt="Profile" style="height:40px;width:40px;"  class="rounded-circle">
+                                       <img src="~/Uploads/${post.url}" alt="Profile" style="height:40px;width:40px;"  class="rounded-circle">
                                     <i class="bi bi-exclamation-circle text-success"></i>
                             <div>
                                     <h4>${post.username}</h4>
@@ -172,6 +174,32 @@
                 $container.append(postHtml);
             });
         }
+
+        $(".notificationBell").click(function () {
+            var notificationIds = [];
+            var noOFNoti = $(".badge-number").text().trim();
+            if (noOFNoti== "0"){
+                return;
+            }
+            $(".notifications").find(".notification-item").each(function () {
+                var notificationId = parseInt($(this).attr("id")); 
+                notificationIds.push(notificationId);
+            });
+         
+            $.ajax({
+                url: '/Notifications/UdpateNotificationStaus/',
+                type: 'POST',
+                contentType: "application/json",
+                data: JSON.stringify(notificationIds),
+                success: function (response) {
+                    toastr.success('Notifiction Read.');
+                },
+                error: function (xhr, status, error) {
+                    
+                    @* toastr.error('Error'); *@
+                }
+            });
+        });
     });
 
 </script>

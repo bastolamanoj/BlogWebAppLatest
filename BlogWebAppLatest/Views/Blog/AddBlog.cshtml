@@ -97,6 +97,14 @@
             maxFileCount: 3 // Limit the maximum number of files
         });
 
+        //handle file pickup
+        $('.btn-kv-close').click(function () {
+            $("#kvFileinputModal").hide();
+            $(".modal-backdrop").remove();
+
+        });
+
+
         $('.has-image.form-switch').click(function () {
             // Check if the toggle switch is checked
             if ($(".has-image").is(':checked')) {

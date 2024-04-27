@@ -114,11 +114,19 @@ namespace BlogWebApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetDashboardDataForBlogger(DateTime? month = null)
+        public async Task<IActionResult> GetDashboardDataForBlogger(int? month = null)
         {
             var dashboardData = new DashboardData();
             var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                // If user is not logged in, return an error or handle it appropriately
+                return BadRequest("User not found.");
+            }
+
             var userId = user.Id;
+
             // Get all-time data if userId is not provided
             if (string.IsNullOrEmpty(userId))
             {
@@ -133,9 +141,9 @@ namespace BlogWebApp.Controllers
                 var userBlogsQuery = _dbContext.Blogs.Where(blog => blog.AuthorId.ToString() == userId);
 
                 // Filter by month if provided
-                if (month.HasValue)
+                if (month.HasValue && month >= 1 && month <= 12)
                 {
-                    var startOfMonth = new DateTime(month.Value.Year, month.Value.Month, 1);
+                    var startOfMonth = new DateTime(DateTime.Now.Year, month.Value, 1);
                     var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
 
                     userBlogsQuery = userBlogsQuery.Where(post => post.CreationAt >= startOfMonth && post.CreationAt <= endOfMonth);
@@ -148,7 +156,7 @@ namespace BlogWebApp.Controllers
                 dashboardData.TotalComments = _dbContext.Comments.Count(comment => comment.CommentedBy.ToString() == userId);
             }
 
-            return Ok(new { dashboardData= dashboardData });
+            return Ok(new { dashboardData = dashboardData });
         }
 
         [HttpGet]
@@ -162,8 +170,8 @@ namespace BlogWebApp.Controllers
                 var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
 
                 query = (Microsoft.EntityFrameworkCore.DbSet<User>)query.OrderByDescending(u =>
-       _dbContext.Blogs.Count(b => b.AuthorId == Guid.Parse(u.Id) && b.CreationAt >= startOfMonth && b.CreationAt <= endOfMonth) +
-       _dbContext.Comments.Count(c => c.CommentedBy == Guid.Parse(u.Id) && c.CreationDate >= startOfMonth && c.CreationDate <= endOfMonth));
+               _dbContext.Blogs.Count(b => b.AuthorId == Guid.Parse(u.Id) && b.CreationAt >= startOfMonth && b.CreationAt <= endOfMonth) +
+               _dbContext.Comments.Count(c => c.CommentedBy == Guid.Parse(u.Id) && c.CreationDate >= startOfMonth && c.CreationDate <= endOfMonth));
             }
             else
             {

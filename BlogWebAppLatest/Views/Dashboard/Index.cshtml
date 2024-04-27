@@ -13,12 +13,6 @@
 
     <div class="pagetitle">
         <h1>Dashboard</h1>
-        @* <nav>
-           <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
-                 <li class="breadcrumb-item active">Dashboard</li>
-            </ol>
-        </nav> *@
     </div><!-- End Page Title -->
 
     <section class="section dashboard">
@@ -26,37 +20,37 @@
         {
             var user = await UserManager.GetUserAsync(User);
             var role = await UserManager.GetRolesAsync(user);
-                <div class="row">
-                    <!-- Dashboard visualzation of overall post, comment and reaction  -->
+            <div class="row">
+                <!-- Dashboard visualization of overall post, comment, and reaction -->
                 <div class="col-lg-10">
-                 <div class="row row-reverse">
-                   <div class="col-xl-12 col-md-12 mb-3">
+                    <div class="row row-reverse">
+                        <div class="col-xl-12 col-md-12 mb-3">
                             @if (role.FirstOrDefault() == "Admin")
-                            { 
-                        <label class="col-sm-5 col-form-label">Filter By Month</label>
-                        <div class="col-sm-6">
+                            {
+                                <label class="col-sm-5 col-form-label">Filter By Month</label>
+                                <div class="col-sm-6">
 
-                            <select class="form-select filterTotal" aria-label="Default select example">
-                                <option selected value="-1">All</option>
-                                <option value="0">Month</option>
-                                <option value="1">January</option>
-                                <option value="2"> Feburary</option>
-                                <option value="3"> March </option>
-                                <option value="4"> April </option>
-                                <option value="5"> May </option>
-                                <option value="6"> June </option>
-                                <option value="7"> July </option>
-                                <option value="8"> August </option>
-                                <option value="9"> September </option>
-                                <option value="10"> Octobor </option>
-                                <option value="11"> November </option>
-                                <option value="12"> December </option>
+                                    <select class="form-select filterTotal" aria-label="Default select example">
+                                        <option selected value="null">All Time</option>
+                                        @* <option value="0">Month</option> *@
+                                        <option value="1">January</option>
+                                        <option value="2">February</option>
+                                        <option value="3">March</option>
+                                        <option value="4">April</option>
+                                        <option value="5">May</option>
+                                        <option value="6">June</option>
+                                        <option value="7">July</option>
+                                        <option value="8">August</option>
+                                        <option value="9">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
 
-                            </select>
-                        </div>
+                                    </select>
+                                </div>
                             }
-                </div>
-            </div> 
+                        </div>
+                    </div>
                     @* this is for overall  *@
                     @if (role.FirstOrDefault() == "Admin")
                     {
@@ -64,10 +58,10 @@
 
                             <!-- Sales Card -->
                             <div class="col-xxl-4 col-md-6">
-                                <div class="card info-card sales-card">
+                                <div class="card info-card sales-card mb-2 pb-1 ">
 
-                                    <div class="card-body">
-                                        <h5 class="card-title"> Total Posts <span>  </span></h5>
+                                    <div class="card-body pb-1">
+                                        <h5 class="card-title pb-1"> Total Posts <span>  </span></h5>
 
                                         <div class="d-flex align-items-center">
                                             <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
@@ -75,7 +69,6 @@
                                             </div>
                                             <div class="ps-3">
                                                 <h6>  @Model.TotalBlogPosts  </h6>
-                                                @* <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">increase</span> *@
 
                                             </div>
                                         </div>
@@ -85,10 +78,10 @@
                             </div><!-- End Sales Card -->
                             <!-- Revenue Card -->
                             <div class="col-xxl-4 col-md-6">
-                                <div class="card info-card revenue-card">
+                                <div class="card info-card revenue-card  mb-2 pb-1">
 
-                                    <div class="card-body">
-                                        <h5 class="card-title">Total Upvotes <span> </span></h5>
+                                    <div class="card-body pb-1">
+                                        <h5 class="card-title pb-1">Total Upvotes <span> </span></h5>
 
                                         <div class="d-flex align-items-center">
                                             <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
@@ -96,7 +89,7 @@
                                             </div>
                                             <div class="ps-3">
                                                 <h6> @Model.TotalUpvotes  </h6>
-                                                @* <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span> *@
+
 
                                             </div>
                                         </div>
@@ -104,21 +97,19 @@
 
                                 </div>
                             </div><!-- End Revenue Card -->
-
                             <!-- Revenue Card -->
                             <div class="col-xxl-4 col-md-6">
-                                <div class="card info-card revenue-card">
+                                <div class="card info-card revenue-card  mb-2 pb-1">
 
-                                    <div class="card-body">
-                                        <h5 class="card-title">Total Downvotes <span> </span></h5>
+                                    <div class="card-body pb-1">
+                                        <h5 class="card-title pb-1">Total Downvotes <span> </span></h5>
 
                                         <div class="d-flex align-items-center">
                                             <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                               <i class="bi bi-hand-thumbs-down"></i>
+                                                <i class="bi bi-hand-thumbs-down"></i>
                                             </div>
                                             <div class="ps-3">
                                                 <h6> @Model.TotalDownvotes  </h6>
-                                                @* <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span> *@
 
                                             </div>
                                         </div>
@@ -129,23 +120,10 @@
                             <!-- Customers Card -->
                             <div class="col-xxl-4 col-md-6">
 
-                                <div class="card info-card customers-card">
+                                <div class="card info-card customers-card  mb-2 pb-1">
 
-                                    @*   <div class="filter">
-                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                    <li class="dropdown-header text-start">
-                                        <h6>Filter</h6>
-                                    </li>
-
-                                    <li><a class="dropdown-item" href="#">Today</a></li>
-                                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                                </ul>
-                            </div> *@
-
-                                    <div class="card-body">
-                                        <h5 class="card-title">Customers <span> </span></h5> 
+                                    <div class="card-body pb-1">
+                                        <h5 class="card-title pb-1">Customers <span> </span></h5>
 
                                         <div class="d-flex align-items-center">
                                             <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
@@ -153,7 +131,6 @@
                                             </div>
                                             <div class="ps-3">
                                                 <h6>  @Model.TotalComments</h6>
-                                                @* <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span> *@
 
                                             </div>
                                         </div>
@@ -163,127 +140,140 @@
 
                             </div><!-- End Customers Card -->
 
-                        </div> 
+                        </div>
                     }
                     @* this dashboard data for logged in blogger or  *@
-                    <div class="row">
-                        <div class="row">
-                            <label class="col-sm-5 col-form-label">Filter By Month</label>
+                    <div class="row col-xl-12 col-md-12 mb-3">
+                        <div class="row col-xl-12 col-md-12">
+                            <label class="col-sm-6 col-form-label text-bold">Filter By Month</label>
                             <div class="col-sm-6">
-                                <select class="form-select filterTotal" aria-label="Default select example">
-                                    <option selected value="-1">All</option>
+                                <select class="form-select filterBloggerTotal" aria-label="Default select example">
+                                    <option selected value="null">All</option>
                                     <option value="0">Month</option>
                                     <option value="1">January</option>
-                                    <option value="2"> Feburary</option>
-                                    <option value="3"> March </option>
-                                    <option value="4"> April </option>
-                                    <option value="5"> May </option>
-                                    <option value="6"> June </option>
-                                    <option value="7"> July </option>
-                                    <option value="8"> August </option>
-                                    <option value="9"> September </option>
-                                    <option value="10"> Octobor </option>
-                                    <option value="11"> November </option>
-                                    <option value="12"> December </option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6">June</option>
+                                    <option value="7">July</option>
+                                    <option value="8">August</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
 
                                 </select>
                             </div>
                         </div>
-                        <div class="row" id="personalDataContainer">
+                        <div class="row mt-3" id="personalDataContainer">
 
+                            <!-- Sales Card -->
+                            <div class="col-xxl-4 col-md-6">
+                                <div class="card info-card sales-card mb-2 pb-1 ">
 
+                                    <div class="card-body pb-1">
+                                        <h5 class="card-title pb-1"> Total Posts <span>  </span></h5>
 
+                                        <div class="d-flex align-items-center">
+                                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                                <i class="bi bi-file-post-fill"></i>
+                                            </div>
+                                            <div class="ps-3">
+                                                <h6 class="TotalBlogPosts"> 0  </h6>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div><!-- End Sales Card -->
+                            <!-- Revenue Card -->
+                            <div class="col-xxl-4 col-md-6">
+                                <div class="card info-card revenue-card  mb-2 pb-1">
+
+                                    <div class="card-body pb-1">
+                                        <h5 class="card-title pb-1">Total Upvotes <span> </span></h5>
+
+                                        <div class="d-flex align-items-center">
+                                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                                <i class="bi bi-hand-thumbs-up"></i>
+                                            </div>
+                                            <div class="ps-3">
+                                                <h6 class="TotalUpvotes"> 0 </h6>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div><!-- End Revenue Card -->
+                            <!-- Revenue Card -->
+                            <div class="col-xxl-4 col-md-6">
+                                <div class="card info-card revenue-card  mb-2 pb-1">
+
+                                    <div class="card-body pb-1">
+                                        <h5 class="card-title pb-1">Total Downvotes <span> </span></h5>
+
+                                        <div class="d-flex align-items-center">
+                                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                                <i class="bi bi-hand-thumbs-down"></i>
+                                            </div>
+                                            <div class="ps-3">
+                                                <h6 class="TotalDownvotes"> 0 </h6>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div><!-- End Revenue Card -->
+                            <!-- Customers Card -->
+                            <div class="col-xxl-4 col-md-6">
+
+                                <div class="card info-card customers-card  mb-2 pb-1">
+
+                                    <div class="card-body pb-1">
+                                        <h5 class="card-title pb-1">Comments <span> </span></h5>
+
+                                        <div class="d-flex align-items-center">
+                                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                                <i class="bi bi-chat"></i>
+                                            </div>
+                                            <div class="ps-3">
+                                                <h6 class="TotalComments">  0 </h6>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div><!-- End Customers Card -->
                         </div>
 
 
                     </div>
                 </div>
-                <!-- End Dashboard visualzation of overall post, comment and reaction -->
-
+                <!-- End Dashboard visualization of overall post, comment, and reaction -->
                 <!-- Right side columns -->
                 <div class="col-lg-8">
 
                     <!-- Recent Activity -->
                     <div class="card">
                         <div class="filter">
-                            @*  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                            <li class="dropdown-header text-start">
-                                <h6>Filter</h6>
-                            </li>
-
-                            <li><a class="dropdown-item" href="#">Today</a></li>
-                            <li><a class="dropdown-item" href="#">This Month</a></li>
-                            <li><a class="dropdown-item" href="#">This Year</a></li>
-                        </ul> *@
                         </div>
 
                         <div class="card-body">
-                            <h5 class="card-title">Top Ten Bloggers <span> | ALl Time</span></h5>
+                            <h5 class="card-title">Top Ten Bloggers <span> | All Time</span></h5>
 
                             <div class="news" id="TopBloggers">
-
-
                             </div>
 
                         </div>
                     </div><!-- End Recent Activity -->
                     <!-- Budget Report -->
+                    <!-- Blogs details -->
 
-                    <!-- Blogs detials -->
-                    @*   <div class="card">
-                    <div class="filter">
-                        <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                            <li class="dropdown-header text-start">
-                                <h6>Filter</h6>
-                            </li>
-
-                            <li><a class="dropdown-item" href="#">Today</a></li>
-                            <li><a class="dropdown-item" href="#">This Month</a></li>
-                            <li><a class="dropdown-item" href="#">This Year</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="card-body pb-0">
-                        <h5 class="card-title">News &amp; Updates <span>| Today</span></h5>
-
-                        <div class="news">
-                            <div class="post-item clearfix">
-                                <img src="assets/img/news-1.jpg" alt="">
-                                <h4><a href="#">Nihil blanditiis at in nihil autem</a></h4>
-                                <p>Sit recusandae non aspernatur laboriosam. Quia enim eligendi sed ut harum...</p>
-                            </div>
-
-                            <div class="post-item clearfix">
-                                <img src="assets/img/news-2.jpg" alt="">
-                                <h4><a href="#">Quidem autem et impedit</a></h4>
-                                <p>Illo nemo neque maiores vitae officiis cum eum turos elan dries werona nande...</p>
-                            </div>
-
-                            <div class="post-item clearfix">
-                                <img src="assets/img/news-3.jpg" alt="">
-                                <h4><a href="#">Id quia et et ut maxime similique occaecati ut</a></h4>
-                                <p>Fugiat voluptas vero eaque accusantium eos. Consequuntur sed ipsam et totam...</p>
-                            </div>
-
-                            <div class="post-item clearfix">
-                                <img src="assets/img/news-4.jpg" alt="">
-                                <h4><a href="#">Laborum corporis quo dara net para</a></h4>
-                                <p>Qui enim quia optio. Eligendi aut asperiores enim repellendusvel rerum cuder...</p>
-                            </div>
-
-                            <div class="post-item clearfix">
-                                <img src="assets/img/news-5.jpg" alt="">
-                                <h4><a href="#">Et dolores corrupti quae illo quod dolor</a></h4>
-                                <p>Odit ut eveniet modi reiciendis. Atque cupiditate libero beatae dignissimos eius...</p>
-                            </div>
-
-                        </div><!-- End sidebar recent posts-->
-
-                    </div>
-                </div>
- *@
                 </div><!-- End Right side columns -->
 
             </div>
@@ -299,135 +289,88 @@
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function () {
         var filterTotalDD = document.querySelector(".filterTotal");
+        //thisis for admin
+        if(filterTotalDD !== null){
+            filterTotalDD.addEventListener("change", function () {
+                var val = this.value;
+                var selectedUrl = "/dashboard/?month=" + val;
+                window.location.href = selectedUrl;
+            });
+        }
+     
 
-        filterTotalDD.addEventListener("change", function () {
-            var val = this.value;
-            var selectedUrl = "/dashboard/?month=" + val;
-            window.location.href = selectedUrl;
-        });
+        // var urlParams = new URLSearchParams(window.location.search);
 
-        var urlParams = new URLSearchParams(window.location.search);
+         //dashboard data for bloggers
 
-        // Get the value of the "param1" parameter
-        var monthpara = urlParams.get('month');
+        function GetDashboardDataforBloggers(month) {
+            $.ajax({
+                url: `/Dashboard/GetDashboardDataForBlogger?month=${month}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    renderDashboardData(data.dashboardData, '#personalDataContainer');
+                },
+                error: function (xhr, status, error) {
+                    // Handle error
+                    console.error('Error fetching dashboard data:', error);
+                }
+            });
+        }
 
-        filterTotalDD.value= monthpara;
         var month = null;
-        $.ajax({
-            url: `/Dashboard/GetDashboardDataForBlogger?month=${month}`, // Replace 'YourController' with the name of your controller
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
+        GetDashboardDataforBloggers(month);
 
-                renderDashboardData(data.recentPosts, '#personalDataContainer');
-            },
-            error: function (xhr, status, error) {
-                // Handle error
-                console.error('Error fetching popular and recent posts:', error);
+        var filterTotalBD = document.querySelector(".filterBloggerTotal");
+        filterTotalBD.addEventListener("change", 
+            function () {
+            console.log("changes");
+                var month = $(this).val() == "null" ? null : parseInt($(this).val());
+                GetDashboardDataforBloggers(month);
+                console.log(month);
             }
-        });
+        );
 
         function renderDashboardData(data, containerSelector) {
 
-            var $container = $(containerSelector);
-            $container.empty();
+            @* var $container = $(containerSelector);
+                $container.empty(); *@
+            $(".TotalBlogPosts").text(data.totalBlogPosts);
+            $(".TotalUpvote").text(data.totalUpvote);
+            $(".TotalDownvote").text(data.totalDownvote);
+            $(".TotalComments").text(data.totalComments);
 
-            var htmdata = `
-                      <div class="col-xxl-4 col-md-6">
-                                <div class="card info-card sales-card">
-
-                                    <div class="card-body">
-                                        <h5 class="card-title"> Total Posts <span>  </span></h5>
-
-                                        <div class="d-flex align-items-center">
-                                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                                <i class="bi bi-file-post-fill"></i>
-                                            </div>
-                                            <div class="ps-3">
-                                                <h6> ${data.totalBlogPosts}  </h6>
-
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                            <div class="col-xxl-4 col-md-6">
-                                <div class="card info-card revenue-card">
-
-                                    <div class="card-body">
-                                        <h5 class="card-title">Total Upvotes <span> </span></h5>
-
-                                        <div class="d-flex align-items-center">
-                                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                                <i class="bi bi-hand-thumbs-up"></i>
-                                            </div>
-                                            <div class="ps-3">
-                                                <h6> ${data.totalUpvotes}  </h6>
-
-
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                            <div class="col-xxl-4 col-md-6">
-                                <div class="card info-card revenue-card">
-
-                                    <div class="card-body">
-                                        <h5 class="card-title">Total Downvotes <span> </span></h5>
-
-                                        <div class="d-flex align-items-center">
-                                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                                <i class="bi bi-hand-thumbs-down"></i>
-                                            </div>
-                                            <div class="ps-3">
-                                                <h6> ${data.totalDownvotes}  </h6>
-
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-            `;
-
-                $container.append(postHtml);
-            });
+           
         }
-    GetTopTenBlogger();
-      function GetTopTenBlogger(month=null) {
-        $.ajax({
-            url: `/Dashboard/GetTopBloggerUsers?month=${month}`,
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                consolee.log(data);
-                var htmldata = ``;
-                $.each(item, function (index, data) {
-                    htmldata += `<div class="post-item clearfix">
+
+        GetTopTenBlogger();
+        function GetTopTenBlogger(month = null) {
+            $.ajax({
+                url: `/Dashboard/GetTopBloggerUsers?month=${month}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    var htmldata = ``;
+                    $.each(data, function (index, item) {
+                        htmldata += `<div class="post-item clearfix">
                                             <img src="assets/img/news-1.jpg" alt="">
                                             <h4><a href="#">Nihil blanditiis at in nihil autem</a></h4>
                                             <p>Sit recusandae non aspernatur laboriosam. Quia enim eligendi sed ut harum...</p>
                                         </div>`;
-                }
+                    });
 
                     $("#TopBloggers").empty().append(htmldata);
 
-            },
-            error: function (xhr, status, error) {
-                // Handle error
-                console.error('Error fetching popular and recent posts:', error);
-            }
-        });
+                },
+                error: function (xhr, status, error) {
+                    // Handle error
+                    console.error('Error fetching top bloggers:', error);
+                }
+            });
         }
-
 
     });
 
 </script>
-
-
-
-

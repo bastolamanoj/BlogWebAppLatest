@@ -61,10 +61,11 @@
             </div><!-- End post list item -->
             }
 
-            @if(Model is  null)
+        
+            @if(Model != null)
             {
-              @Html.PagedListPager(Model, page => Url.RouteUrl("/", new { page }),
-                             new PagedListRenderOptions
+                @Html.PagedListPager(Model, page => Url.Action("", new { page }),
+                         new PagedListRenderOptions
                 {
                     DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
                     DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
@@ -74,8 +75,8 @@
                     LiElementClasses = new[] { "page-item", "custom-page-item-class" }, // Bootstrap page item class
                     PageClasses = new[] { "page-link", "custom-page-link-class" } // Bootstrap page link class
                 })
+
             }
-              
         @* </div><!-- End blog pagination --> *@
 
     </div>
