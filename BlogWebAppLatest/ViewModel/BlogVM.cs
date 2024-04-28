@@ -21,6 +21,8 @@ namespace BlogWebApp.ViewModel
         public int? TotalUpvote { get; set; }
         public int? TotalDownvote { get; set; }
         public string? UserName { get; set; }
+        //this is forlog
+        public string? Action { get; set; }
         public string? ProfileUrl { get; set; }
     }
 

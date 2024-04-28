@@ -433,6 +433,51 @@ namespace BlogWebApp.Controllers
             return View(model);
         }
 
+        [UserAuthorize]
+        [HttpPost]
+        public async Task<IActionResult> UpdateBlog(BlogVM model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var userid = user.Id;
+            if (ModelState.IsValid)
+            {
+                var blog = await _dbContext.Blogs.FindAsync(model.Id);
+                if (blog == null)
+                {
+                    return NotFound();
+                }
+
+                // Update blog properties
+                blog.Title = model.Title;
+                blog.Body = model.Body;
+                blog.BlogCategoryId = model.BlogCategoryId;
+                blog.AuthorId = (user == null ? Guid.Empty : (Guid.TryParse(userid, out var userId) ? userId : Guid.Empty));
+                blog.UpdatedAt = DateTime.Now;
+
+                // Delete existing images
+                var existingImages = _dbContext.BlogImages.Where(bi => bi.BlogId == blog.Id);
+                _dbContext.BlogImages.RemoveRange(existingImages);
+
+                // Add new images
+                foreach (var imageFile in model.BlogImages)
+                {
+                    var blogImage = new BlogImage
+                    {
+                        BlogId = blog.Id,
+                        Url = imageFile.Url, 
+                        ImageName = imageFile.ImageName
+                    };
+                    _dbContext.BlogImages.Add(blogImage);
+                }
+
+                await _dbContext.SaveChangesAsync();
+                return RedirectToAction("manageblog", new { page = 1 });
+            }
+            return View(model);
+        }
+
+
+
         ////[HttpPost("RemoveBlog/{id}")]
         //[HttpPost, ActionName("RemoveBlog")]
         //[ValidateAntiForgeryToken]

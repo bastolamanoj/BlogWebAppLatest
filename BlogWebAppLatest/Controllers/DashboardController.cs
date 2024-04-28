@@ -160,40 +160,45 @@ namespace BlogWebApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetTopBloggerUsers(DateTime? month = null)
+        public IActionResult GetTopBloggerUsers(int? month = null)
         {
-            var query = _dbContext.Users; // Directly accessing the Users table
+            //var query = _dbContext.Users; // Directly accessing the Users table
 
-            if (month.HasValue)
+            if (month.HasValue && month >= 1 && month <= 12) // Validating month input
             {
-                var startOfMonth = new DateTime(month.Value.Year, month.Value.Month, 1);
+                var year = DateTime.UtcNow.Year; // Assuming the current year
+                var startOfMonth = new DateTime(year, month.Value, 1);
                 var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
 
-                query = (Microsoft.EntityFrameworkCore.DbSet<User>)query.OrderByDescending(u =>
-               _dbContext.Blogs.Count(b => b.AuthorId == Guid.Parse(u.Id) && b.CreationAt >= startOfMonth && b.CreationAt <= endOfMonth) +
-               _dbContext.Comments.Count(c => c.CommentedBy == Guid.Parse(u.Id) && c.CreationDate >= startOfMonth && c.CreationDate <= endOfMonth));
+                var query = _dbContext.Users.OrderByDescending(u => 
+                    _dbContext.Blogs.Count(b => b.AuthorId == Guid.Parse(u.Id) && b.CreationAt >= startOfMonth && b.CreationAt <= endOfMonth) +
+                    _dbContext.Comments.Count(c => c.CommentedBy.ToString() == u.Id && c.CreationDate >= startOfMonth && c.CreationDate <= endOfMonth));
+                var topUsers = query.Take(10).ToList();
+
+                return Ok(topUsers);
             }
             else
             {
-                query = (Microsoft.EntityFrameworkCore.DbSet<User>)query.OrderByDescending(u =>
+               var query = _dbContext.Users.OrderByDescending(u =>
                     _dbContext.Blogs.Count(b => b.AuthorId.ToString() == u.Id) +
-                    _dbContext.Comments.Count(c => c.CommentedBy == Guid.Parse(u.Id)));
+                    _dbContext.Comments.Count(c => c.CommentedBy.ToString() == u.Id));
+                var topUsers = query.Take(10).ToList();
+
+                return Ok(topUsers);
             }
-
-            var topUsers = query.Take(10).ToList();
-
-            return Ok(topUsers);
-
         }
 
+
         [HttpGet]
-        public IActionResult GetTopBlogs(DateTime? month = null)
+        public async Task<IActionResult> GetTopBlogs(int? month = null)
         {
             var query = _dbContext.Blogs.AsQueryable();
 
-            if (month.HasValue)
+            if (month.HasValue && month >= 1 && month <= 12)
             {
-                var startOfMonth = new DateTime(month.Value.Year, month.Value.Month, 1);
+                // Construct start and end dates based on the month provided
+                var year = DateTime.Now.Year; // Assuming current year
+                var startOfMonth = new DateTime(year, month.Value, 1);
                 var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
 
                 query = query.Where(b => b.CreationAt >= startOfMonth && b.CreationAt <= endOfMonth);
@@ -203,8 +208,20 @@ namespace BlogWebApp.Controllers
                     (_dbContext.Reactions.Count(r => r.EntityId == b.Id && r.Type == "Upvote") -
                     _dbContext.Reactions.Count(r => r.EntityId == b.Id && r.Type == "Downvote")) +
                     _dbContext.Comments.Count(c => c.BlogId == b.Id))
-                .Take(10)
+                 .Select(blog => new
+                 {
+                     Id = blog.Id,
+                     Title = blog.Title,
+                     PublishedDate = blog.CreationAt,
+                     BlogImage = blog.BlogImages.FirstOrDefault().Url
+                 })
+                 .Take(10)
                 .ToList();
+
+        //    var popularPosts = _dbContext.Blogs
+        // .OrderByDescending(blog => blog.CreationAt)
+        // .Take(10)
+        //;
 
             return Ok(topBlogs);
         }

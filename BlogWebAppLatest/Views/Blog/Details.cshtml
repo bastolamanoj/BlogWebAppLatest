@@ -442,6 +442,7 @@
                 data: JSON.stringify(comment),
                 success: function (response) {
                     toastr.success('Comment posted successfully');
+                  
                     var Username = $(".UserName").text();
                     var notification ={
                         Title: 'Comment Notificaion',
@@ -494,6 +495,10 @@
                 data: JSON.stringify(commentReply),
                 success: function (response) {
                     toastr.success('Reply updated successfully');
+                    location.reload();
+                    $('html, body').animate({
+                        scrollTop: 500
+                    }, 800);
                     var replyhtml = `
                          <div id="comment-${k}" class="comment comment-reply">
                                     <div class="d-flex">

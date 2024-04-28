@@ -173,6 +173,7 @@
                 BlogCategoryId: parseInt($(`.blogcategory`).val()),
                 BlogImages: fileLinks
             }
+            var category = $(`.blogcategory`).text();
            
             if (hasEmptyProperty(model)) { 
                 // toastr();
@@ -187,6 +188,7 @@
                 data: model,
                 success: function (response) {
                     toastr.success('Blog Published Successfully');
+                    SaveBlogLogFile(model, category);
                     window.location.href="/manageblog"
                     // Handle success response
                 },
@@ -196,6 +198,29 @@
                 }
             });
         });
+
+
+        async function SaveBlogLogFile(modeldata, category) {
+           var model = {
+                Title: modeldata.Title,
+                Body: modeldata.Body,
+                CategoryName: category,
+                Action:"Blog Published"
+           }
+            // SaveBlogFile
+            await $.ajax({
+                url: '/File/SaveBlogFile',
+                type: 'POST',
+                data: model,
+                success: function (response) {
+                    console.log("log Saved");
+                },
+                error: function (xhr, status, error) {
+                    console.log("Error to Save log");
+                }
+            });
+        }
+
     });
 
 
