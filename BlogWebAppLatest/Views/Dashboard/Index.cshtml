@@ -266,14 +266,68 @@
                 <!-- End Dashboard visualization of overall post, comment, and reaction -->
                 <!-- Right side columns -->
                 <div class="col-lg-8">
+                    <div class="card">
+                        <div class="filter">
+                        </div>
+                        <div class="card-body">
+                            <div class="row card-title">
+                                <label class="col-sm-5 col-form-label"> Top Ten Blogs <span> | </span> </label>
+                                <div class="col-sm-6">
 
+                                    <select class="form-select filterBlogs" aria-label="Default select example">
+                                        <option selected value="null">All Time</option>
+                                        @* <option value="0">Month</option> *@
+                                        <option value="1">January</option>
+                                        <option value="2">February</option>
+                                        <option value="3">March</option>
+                                        <option value="4">April</option>
+                                        <option value="5">May</option>
+                                        <option value="6">June</option>
+                                        <option value="7">July</option>
+                                        <option value="8">August</option>
+                                        <option value="9">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="news blogs" id="TopBlogs">
+                            </div>
+
+                        </div>
+                    </div>
                     <!-- Recent Activity -->
                     <div class="card">
                         <div class="filter">
                         </div>
 
                         <div class="card-body">
-                            <h5 class="card-title">Top Ten Bloggers <span> | All Time</span></h5>
+                            <div class="row card-title">
+                                <label class="col-sm-5 col-form-label"> Top Ten Bloggers <span> | All Time</span> </label>
+                                <div class="col-sm-6">
+
+                                    <select class="form-select filterBlogger" aria-label="Default select example">
+                                        <option selected value="null">All Time</option>
+                                        @* <option value="0">Month</option> *@
+                                        <option value="1">January</option>
+                                        <option value="2">February</option>
+                                        <option value="3">March</option>
+                                        <option value="4">April</option>
+                                        <option value="5">May</option>
+                                        <option value="6">June</option>
+                                        <option value="7">July</option>
+                                        <option value="8">August</option>
+                                        <option value="9">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+
+                                    </select>
+                                </div>
+                            </div>
 
                             <div class="news" id="TopBloggers">
                             </div>
@@ -281,18 +335,7 @@
                         </div>
                     </div><!-- End Recent Activity -->
 
-                    <div class="card">
-                        <div class="filter">
-                        </div>
-
-                        <div class="card-body">
-                            <h5 class="card-title">Top Ten Blogs <span> | All Time</span></h5>
-
-                            <div class="news blogs" id="TopBlogs">
-                            </div>
-
-                        </div>
-                    </div>
+                  
                 </div><!-- End Right side columns -->
 
             </div>
@@ -302,25 +345,19 @@
 </div>
 
 <link href="~/toastr/css/toastr.css" rel="stylesheet" />
-<script src="~/lib/jquery/dist/jquery.js"></script>
+@* <script src="~/lib/jquery/dist/jquery.js"></script> *@
 <script src="~/toastr/js/toastr.min.js"></script>
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function () {
-        var filterTotalDD = document.querySelector(".filterTotal");
-        //thisis for admin
-        if(filterTotalDD !== null){
-            filterTotalDD.addEventListener("change", function () {
-                var val = this.value;
+    $(document).ready(function () {
+        var filterTotalDD = $(".filterTotal");
+        if (filterTotalDD.length > 0) {
+            filterTotalDD.on("change", function () {
+                var val = $(this).val();
                 var selectedUrl = "/dashboard/?month=" + val;
                 window.location.href = selectedUrl;
             });
         }
-     
-
-        // var urlParams = new URLSearchParams(window.location.search);
-
-         //dashboard data for bloggers
 
         function GetDashboardDataforBloggers(month) {
             $.ajax({
@@ -328,11 +365,9 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {
-                  
                     renderDashboardData(data.dashboardData, '#personalDataContainer');
                 },
                 error: function (xhr, status, error) {
-                    // Handle error
                     console.error('Error fetching dashboard data:', error);
                 }
             });
@@ -341,26 +376,19 @@
         var month = null;
         GetDashboardDataforBloggers(month);
 
-        var filterTotalBD = document.querySelector(".filterBloggerTotal");
-        filterTotalBD.addEventListener("change", 
-            function () {
-           
+        var filterTotalBD = $(".filterBloggerTotal");
+        if (filterTotalBD.length > 0) {
+            filterTotalBD.on("change", function () {
                 var month = $(this).val() == "null" ? null : parseInt($(this).val());
                 GetDashboardDataforBloggers(month);
-                
-            }
-        );
+            });
+        }
 
         function renderDashboardData(data, containerSelector) {
-
-            @* var $container = $(containerSelector);
-                $container.empty(); *@
             $(".TotalBlogPosts").text(data.totalBlogPosts);
             $(".TotalUpvote").text(data.totalUpvote);
             $(".TotalDownvote").text(data.totalDownvote);
             $(".TotalComments").text(data.totalComments);
-
-           
         }
 
         GetTopTenBlogger();
@@ -370,14 +398,13 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {
-                    
                     var htmldata = ``;
                     $.each(data, function (index, item) {
                         var image = item.profileUrl == null ? "/Images/defaultPic.jpg" : item.profileUrl;
                         htmldata += `<div class="post-item clearfix">
-                                                    <img src="/Uploads/${image}" alt="">
-                                                 <h4><a href="#"> ${item.displayName}</a></h4>
-                                                    <p> ${item.bio}</p>
+                                            <img src="/Uploads/${image}" alt="">
+                                            <h4><a href="#"> ${item.displayName}</a></h4>
+                                            <p> ${item.bio}</p>
                                         </div>`;
                     });
 
@@ -385,7 +412,6 @@
 
                 },
                 error: function (xhr, status, error) {
-                    // Handle error
                     console.error('Error fetching top bloggers:', error);
                 }
             });
@@ -398,28 +424,39 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {
-                    console.log(data);
                     var htmldata = ``;
                     $.each(data, function (index, item) {
                         var image = item.blogImage == null ? "/Images/defaultPic.jpg" : item.blogImage;
-                        htmldata += `
-                       <div class="post-item clearfix">
-                          <img src="/Uploads/${image}" alt="">
-                          <h4><a href="/blog-details?id=${item.id}"> ${item.title} </a></h4>
-                            <p class=""> ${item.publishedDate} </p>
-                    </div>`;
+                        htmldata += `<div class="post-item clearfix">
+                                            <img src="/Uploads/${image}" alt="">
+                                            <h4><a href="/blog-details?id=${item.id}"> ${item.title} </a></h4>
+                                            <p class=""> ${item.publishedDate} </p>
+                                        </div>`;
                     });
 
                     $("#TopBlogs").empty().append(htmldata);
 
                 },
                 error: function (xhr, status, error) {
-                    // Handle error
                     console.error('Error fetching top bloggers:', error);
                 }
             });
         }
 
-    });
+        var filterTopBlogger = $(".filterBlogger");
+        if (filterTopBlogger.length > 0) {
+            filterTopBlogger.on("change", function () {
+                var month = $(this).val() == "null" ? null : parseInt($(this).val());
+                GetTopTenBlogger(month);
+            });
+        }
 
+        var filterTopBlogs = $(".filterBlogs");
+        if (filterTopBlogs.length > 0) {
+            filterTopBlogs.on("change", function () {
+                var month = $(this).val() == "null" ? null : parseInt($(this).val());
+                GetTopTenBlogs(month);
+            });
+        }
+    });
 </script>

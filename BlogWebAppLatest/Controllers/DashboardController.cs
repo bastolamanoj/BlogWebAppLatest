@@ -5,6 +5,8 @@ using BlogWebApp.ViewModel;
 using BlogWebAppLatest.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.X509.Qualified;
 using System.Diagnostics;
 
 namespace BlogWebApp.Controllers
@@ -160,32 +162,61 @@ namespace BlogWebApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetTopBloggerUsers(int? month = null)
+        public async Task<IActionResult> GetTopBloggerUsers(int? month = null)
         {
-            //var query = _dbContext.Users; // Directly accessing the Users table
-
             if (month.HasValue && month >= 1 && month <= 12) // Validating month input
             {
                 var year = DateTime.UtcNow.Year; // Assuming the current year
                 var startOfMonth = new DateTime(year, month.Value, 1);
                 var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
 
-                var query = _dbContext.Users.OrderByDescending(u => 
-                    _dbContext.Blogs.Count(b => b.AuthorId == Guid.Parse(u.Id) && b.CreationAt >= startOfMonth && b.CreationAt <= endOfMonth) +
-                    _dbContext.Comments.Count(c => c.CommentedBy.ToString() == u.Id && c.CreationDate >= startOfMonth && c.CreationDate <= endOfMonth));
-                var topUsers = query.Take(10).ToList();
+                //var query = (from user in _dbContext.Users
+                //             join reaction in _dbContext.Reactions
+                //             on user.Id equals reaction.UserId.ToString()
+                //             select new
+                //             {
+                //                 Bio= user.Bio,
+                //                 DisplayName= user.DisplayName,
+                //                 ProfileUrl = user.ProfileUrl,
+                //                 UserId = user.Id,
+                //                 UserName = user.DisplayName,
+                //                 ReactionCount = _dbContext.Reactions.Count(r => r.UserId.ToString() == user.Id)
+                //             })
+                //          .OrderByDescending(u => u.ReactionCount)
+                //          .Take(10);
 
+                //var topUsers = await query.ToListAsync();
+
+                var topUsers = (from r in _dbContext.Reactions
+                                join u in _dbContext.Users on r.UserId.ToString() equals u.Id
+                                where r.Type == "Upvote" &&
+                                      r.CreationDate >= startOfMonth &&
+                                      r.CreationDate <= endOfMonth
+                                group r by new { u.ProfileUrl, u.Id, u.Bio, u.DisplayName } into g
+                                orderby g.Count() descending
+                                select new
+                                {
+                                    UpvoteCount = g.Count(),
+                                    ProfileUrl = g.Key.ProfileUrl,
+                                    UserId = g.Key.Id,
+                                    Bio = g.Key.Bio,
+                                    DisplayName = g.Key.DisplayName
+                                }).Take(10).ToList();
                 return Ok(topUsers);
             }
             else
             {
-               var query = _dbContext.Users.OrderByDescending(u =>
-                    _dbContext.Blogs.Count(b => b.AuthorId.ToString() == u.Id) +
-                    _dbContext.Comments.Count(c => c.CommentedBy.ToString() == u.Id));
-                var topUsers = query.Take(10).ToList();
+                var query = _dbContext.Users
+                    .OrderByDescending(u =>
+                        _dbContext.Blogs.Count(b => b.AuthorId.ToString() == u.Id) +
+                        _dbContext.Comments.Count(c => c.CommentedBy.ToString() == u.Id))
+                    .Take(10);
+
+                var topUsers = await query.ToListAsync();
 
                 return Ok(topUsers);
             }
+            return Ok();
         }
 
 

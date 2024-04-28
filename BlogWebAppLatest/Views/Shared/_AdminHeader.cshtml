@@ -193,6 +193,7 @@
                 data: JSON.stringify(notificationIds),
                 success: function (response) {
                     toastr.success('Notifiction Read.');
+                    $(".badge-number").text(0);
                 },
                 error: function (xhr, status, error) {
                     
