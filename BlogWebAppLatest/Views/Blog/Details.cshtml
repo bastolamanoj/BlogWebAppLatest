@@ -61,7 +61,7 @@
                     <!-- Slides with indicators -->
                     @if (Model.BlogImages.Count() > 0)
                     {
-                        <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                       @*  <div id="carouselExampleIndicators" class="carousel slide">
                             <div class="carousel-indicators">
                                 @{
                                     var index = 0;
@@ -69,7 +69,42 @@
                                 @foreach (var imageItem in Model.BlogImages)
                                 {
                                     index++;
-                                    <button type="button" data-bs-target="#carouselExampleIndicators@(index)" data-bs-slide-to="@index" class="" aria-label="Slide @index" @(index == 1 ? "class='active' aria-current='true'" : "")></button>
+                                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="@index" aria-label="Slide @index" @(index == 1 ? "class='active' aria-current='true'" : "")></button>
+                                
+                                }
+                                
+                            </div>
+                            <div class="carousel-inner">
+                                @{
+                                    var imageIndex = 0;
+                                }
+                                @foreach (var imageItem in Model.BlogImages)
+                                {
+                                    imageIndex++;
+                                    <div class="carousel-item @(imageIndex == 1 ? "active" : "")">
+                                        <img src="~/Uploads/@imageItem.Url" class="d-block w-100" alt="@imageItem.ImageName">
+                                    </div>
+                                }
+                              
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div> *@
+                        <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="true">
+                            <div class="carousel-indicators">
+                                @{
+                                    var index = 0;
+                                }
+                                @foreach (var imageItem in Model.BlogImages)
+                                {
+                                    index++;
+                                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="@index" aria-label="Slide @index" class="@(index == 1 ? "active" : "")" aria-current="@(index == 1 ? "true" : "false")"></button>
                                 }
                             </div>
                             <div class="carousel-inner">
@@ -79,7 +114,7 @@
                                 @foreach (var imageItem in Model.BlogImages)
                                 {
                                     imageIndex++;
-                                    <div class="carousel-item @(imageIndex == 1 ? "active" : "notactive")">
+                                    <div class="carousel-item @(imageIndex == 1 ? "active" : "")">
                                         <img src="~/Uploads/@imageItem.Url" class="d-block w-100" alt="@imageItem.ImageName">
                                     </div>
                                 }
@@ -98,6 +133,7 @@
 
                         </div>
 
+                    
                     }
                     <!-- End Slides with indicators -->
 
@@ -287,9 +323,12 @@
     </div>
 </section><!-- End Blog Details Section -->
 @* <style href="~/toastr/js/toastr.js" rel="stylesheet"></style> *@
-<link href="~/toastr/css/toastr.css" rel="stylesheet" />
 <script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<link href="~/toastr/css/toastr.css" rel="stylesheet" />
 <script src="~/toastr/js/toastr.min.js"></script>
+
 <script type="text/javascript">
     $(document).ready(function () {
         function fetchData(url, method, data, successCallback, errorCallback) {
@@ -301,6 +340,7 @@
                 error: errorCallback
             });
         }
+        $('.ql-toolbar:not(:last)').remove();
 
         function renderPosts(posts, containerSelector) {
 

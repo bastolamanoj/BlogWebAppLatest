@@ -266,6 +266,12 @@
                 <!-- End Dashboard visualization of overall post, comment, and reaction -->
                 <!-- Right side columns -->
                 <div class="col-lg-8">
+        @if (SignInManager.IsSignedIn(User))
+        {
+            var user2 = await UserManager.GetUserAsync(User);
+            var role2 = await UserManager.GetRolesAsync(user2);
+            if (@role2.FirstOrDefault() == "Admin")
+            {
                     <div class="card">
                         <div class="filter">
                         </div>
@@ -335,7 +341,8 @@
                         </div>
                     </div><!-- End Recent Activity -->
 
-                  
+                  }
+         }
                 </div><!-- End Right side columns -->
 
             </div>
