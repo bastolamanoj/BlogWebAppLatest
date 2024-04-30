@@ -76,15 +76,15 @@ namespace BlogWebApp.Controllers
             var user = _userManager.GetUserAsync(User).Result;
             var userid = user.Id;
 
-            var comment = 
+            var reaction = 
                 _dbContext.Reactions.Where(x=>x.EntityId==id && x.UserId== Guid.Parse(userid)).FirstOrDefault();
 ;
-            if (comment == null)
+            if (reaction == null)
             {
                 return NotFound("Comment not found.");
             }
 
-                _dbContext.Reactions.Remove(comment);
+                _dbContext.Reactions.Remove(reaction);
             await _dbContext.SaveChangesAsync();
 
             return Ok(new { status = "200", message = "success" });

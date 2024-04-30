@@ -205,10 +205,10 @@ namespace BlogWebApp.Controllers
             {
                 //if (DateTime.TryParse(parts[0] + "-" + parts[1], out DateTime creationDate))
                 //{
-                    return parts[0]+ parts[1]+ parts[2];
+                return parts[0] + "-" + parts[1] + "-" + parts[2];
                 //}
             }
-            return parts[0] + parts[1] + parts[2];
+            return parts[0]+"-" + parts[1] + "-" + parts[2];
         }
 
         private string ExtractBlogTitleFromFileName(string fileName)
@@ -218,7 +218,7 @@ namespace BlogWebApp.Controllers
             string[] parts = fileName.Split('-');
             if (parts.Length >= 3)
             {
-                return string.Join("-", parts.Skip(2)).Replace(".txt", "");
+                return string.Join("-", parts.Skip(8)).Replace(".txt", "");
             }
             return null; // Or handle the case where blog title cannot be extracted
         }

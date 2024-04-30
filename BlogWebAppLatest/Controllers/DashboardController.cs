@@ -130,7 +130,7 @@ namespace BlogWebApp.Controllers
             var userId = user.Id;
 
             // Get all-time data if userId is not provided
-            if (string.IsNullOrEmpty(userId))
+            if (month==null)
             {
                 dashboardData.TotalBlogPosts = _dbContext.Blogs.Count();
                 dashboardData.TotalUpvotes = _dbContext.Reactions.Where(a => a.Type == "Upvote").Count();
@@ -149,13 +149,14 @@ namespace BlogWebApp.Controllers
                     var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
 
                     userBlogsQuery = userBlogsQuery.Where(post => post.CreationAt >= startOfMonth && post.CreationAt <= endOfMonth);
-                }
+            
 
                 // Calculate counts
                 dashboardData.TotalBlogPosts = userBlogsQuery.Count();
-                dashboardData.TotalUpvotes = _dbContext.Reactions.Where(a => a.Type == "Upvote" && a.UserId.ToString() == userId).Count();
-                dashboardData.TotalDownvotes = _dbContext.Reactions.Where(a => a.Type == "Downvote" && a.UserId.ToString() == userId).Count();
-                dashboardData.TotalComments = _dbContext.Comments.Count(comment => comment.CommentedBy.ToString() == userId);
+                dashboardData.TotalUpvotes = _dbContext.Reactions.Where(a => a.Type == "Upvote" && a.UserId.ToString() == userId && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).Count();
+                dashboardData.TotalDownvotes = _dbContext.Reactions.Where(a => a.Type == "Downvote" && a.UserId.ToString() == userId && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).Count();
+                dashboardData.TotalComments = _dbContext.Comments.Count(comment => comment.CommentedBy.ToString() == userId && comment.CreationDate >= startOfMonth && comment.CreationDate <= endOfMonth);
+                }
             }
 
             return Ok(new { dashboardData = dashboardData });

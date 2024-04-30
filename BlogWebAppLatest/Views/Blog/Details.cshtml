@@ -15,7 +15,7 @@
     .vote-btn {
         cursor: pointer;
     }
-
+    
         .vote-btn i {
             margin-right: 5px;
         }
@@ -213,10 +213,10 @@
                                 </div>
                             </div>
                             <div class="btn-group" role="group" aria-label="Vote Buttons">
-                                <button type="button" category="Comment" entityid="@comment.CommentId" class="btn btn-sm btn-outline-success upvote-btn vote-btn  @(Model.IsVoted == true && Model.VoteType == "Upvote" ? "active" : "")" IsVoted="@(Model.IsVoted == true && Model.VoteType == "Upvote" ? "true" : "false")" data-type="Upvote">
+                                <button type="button" category="Comment" entityid="@comment.CommentId" class="btn btn-sm btn-outline-success upvote-btn vote-btn  @(comment.IsVoted == true && comment.VoteType == "Upvote" ? "active" : "")" IsVoted="@(Model.IsVoted == true && Model.VoteType == "Upvote" ? "true" : "false")" data-type="Upvote">
                                     <span id="upvote-count" class="badge bg-success"> @comment.TotalUpvote </span> <i class="bi bi-arrow-up"></i>
                                 </button>
-                                <button type="button" category="Comment" entityid="@comment.CommentId" class="btn btn-sm btn-outline-danger downvote-btn vote-btn  @(Model.IsVoted == true && Model.VoteType == "Downvote" ? "active" : "")" IsVoted="@(Model.IsVoted == true && Model.VoteType == "Downvote" ? "true" : "false")" data-type="Downvote">
+                                <button type="button" category="Comment" entityid="@comment.CommentId" class="btn btn-sm btn-outline-danger downvote-btn vote-btn  @(comment.IsVoted == true && comment.VoteType == "Downvote" ? "active" : "")" IsVoted="@(Model.IsVoted == true && Model.VoteType == "Downvote" ? "true" : "false")" data-type="Downvote">
                                     <span id="downvote-count" class="badge bg-danger">  @comment.TotalDownvote </span> <i class="bi bi-arrow-down"></i>
                                 </button>
                                 @if (SignInManager.IsSignedIn(User))
@@ -383,9 +383,10 @@
             if ('@SignInManager.IsSignedIn(User)' == 'True') {
            
             var type = $(this).data('type');
-            var alreadyVoted = $(this).attr("IsVoted");
-            if (alreadyVoted == "true") {
-                removeReaction($(this).attr("EntityId"));
+            // var alreadyVoted = $(this).attr("IsVoted");
+            var alreadyVoted = $(this).hasClass("active");
+            if (alreadyVoted) {
+                removeReaction($(this),$(this).attr("EntityId"));
                 return;
             }
 
@@ -396,11 +397,13 @@
 
         });
 
-        function removeReaction(id) {
+        function removeReaction($btn,id) {
             $.ajax({
                 url: '/Reaction/DeleteReaction/' + id,
                 type: 'DELETE',
                 success: function (response) {
+                    $btn.removeClass("active");
+                    $btn.find("span").text(0);
                     toastr.success('Reaction removed.');
 
                 },
@@ -414,9 +417,10 @@
 
         // Function to handle toggling of vote buttons
         function toggleVote($btn, type) {
-            var $otherBtn = (type === 'Upvote') ? $btn.filter(".downvote-btn") : $btn.filter(".upvote-btn");
+            debugger;
+            var $otherBtn = (type === 'Upvote') ? $btn.closest(".btn-group").find(".downvote-btn") : $btn.closest(".btn-group").find(".upvote-btn");
             var $voteCount = (type === 'Upvote') ? $btn.find('#upvote-count') : $btn.find('#downvote-count');
-            var $otherVoteCount = (type === 'Upvote') ? $btn.find('#downvote-count') : $btn.find('#upvote-count');
+            var $otherVoteCount = (type === 'Upvote') ? $btn.closest(".btn-group").find('#downvote-count') : $btn.closest(".btn-group").find('#upvote-count');
 
             if ($btn.hasClass('active')) {
                 // If the button is already active (voted), unvote it

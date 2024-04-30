@@ -234,7 +234,12 @@ namespace BlogWebApp.Controllers
                                        TotalUpvote = _dbContext.Reactions.Count(r => r.EntityId == comment.Id && r.Type == "Upvote"),
                                        TotalDownvote = _dbContext.Reactions.Count(r => r.EntityId == comment.Id && r.Type == "Downvote"),
                                        IsVoted = (_dbContext.Reactions.FirstOrDefault(x => x.UserId == Guid.Parse(user.Id) && x.EntityId == comment.Id)) == null ? false : true,
-                                       UserName = _dbContext.Users
+                                       VoteType = _dbContext.Reactions
+                                                        .Where(x => x.UserId == Guid.Parse(user.Id) && x.EntityId == comment.Id)
+                                                        .Select(a => a.Type)
+                                                        .FirstOrDefault() ?? string.Empty,
+
+                                     UserName = _dbContext.Users
                                                         .Where(x => x.Id == comment.CommentedBy.ToString())
                                                         .Select(x => x.DisplayName)
                                                         .FirstOrDefault(),
