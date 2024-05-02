@@ -36,7 +36,7 @@ namespace BlogWebApp.Controllers
             // Save the reply to the database
                _dbcontext.CommentReplies.Add(reply);
             await  _dbcontext.SaveChangesAsync();
-            return Ok(new { status = "success", message = "Reply added successfully" });
+            return Ok(new { status = "success", message = "Reply added successfully" , replyId = reply.Id });
             // Redirect the user back to the blog details page or return JSON response indicating success
         }
 

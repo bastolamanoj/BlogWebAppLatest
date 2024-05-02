@@ -262,6 +262,7 @@
                                             }
                                         }
                                     </div>
+                                  
                                 </div>
 
                             </div>
@@ -601,6 +602,7 @@
                     }
                      var isMyBlog = $(".blogDetails").attr("IsMyBlog");
                     if (isMyBlog == "False") {
+                        debugger;
                         AddNotification(notification);
                     }
                    
@@ -610,7 +612,7 @@
                     // }, 800);
                     var profile = $(".navbar").find("img").attr("src");
                     var replyhtml = `
-                         <div id="comment-${6}" class="comment comment-reply">
+                             <div id="comment-${6}" class="comment comment-reply" replyId="${response.replyId}">
                                     <div class="d-flex">
                                             <div class="comment-img"><img src="${profile}" alt=""></div>
                                         <div>
@@ -619,6 +621,11 @@
                                             <p>
                                                 ${commentReply.Content}
                                             </p>
+                                        </div>
+                                              <div class="btn-group" role="group" aria-label="Vote Buttons">
+                                                <button style="display:none;" type="button" entityid="${response.replyId}" class="btn btn-sm ms-1 btn-outline-danger removeCmtReplyBtn remove-btn" data-type="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </div>
                                     </div>
 
@@ -635,7 +642,12 @@
                         Body: `${Username} Comment On Your Blog`,
                         BlogId: $(".blogDetails").attr('blog-id')
                     }
-                    AddNotification(notification);
+                    var isMyBlog = $(".blogDetails").attr("IsMyBlog");
+                    if (isMyBlog == "False") {
+                        
+                        AddNotification(notification);
+                    }
+                    // AddNotification(notification);
                 },
                 error: function (xhr, status, error) {
                     console.error('Error updating reply status:', error);
@@ -696,8 +708,8 @@
             });
         }
 
-        function AddNotification(notification) {
-            $.ajax({
+       async function AddNotification(notification) {
+           await $.ajax({
                 url: '/Notifications/Create',
                 type: 'POST',
                 contentType: 'application/json',
@@ -707,7 +719,7 @@
                 },
                 error: function (xhr, status, error) {
                     AddNotification(notification);
-                    console.log("Notification added successfully");
+                    // console.log("Notification added successfully");
                 }
             });
         }
