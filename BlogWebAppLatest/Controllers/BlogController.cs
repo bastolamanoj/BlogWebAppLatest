@@ -485,6 +485,7 @@ namespace BlogWebApp.Controllers
                 }
 
                 await _dbContext.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Blog Updated Successfully...";
                 return RedirectToAction("manageblog", new { page = 1 });
             }
             return View(model);
