@@ -42,7 +42,7 @@
             color: white;
         }
 
-    .comment:hover .removeCmtBtn {
+    .comment:hover .removeCmtBtn, .comment:hover .removeCmtReplyBtn {
         display: block !important;
     }
 </style>
@@ -194,9 +194,11 @@
                     {
                         var k = 0;
                         i++;
-                        <div id="comment-@i" class="comment">
+                        var cmtProfile =  @comment.Url== null  ? "Images/defaultPic.jpg" :@comment.Url ;
+
+                        <div id="comment-@i" class="comment" >
                             <div class="d-flex">
-                                <div class="comment-img"><img src="~/Uploads/@comment.Url" alt=""></div>
+                                <div class="comment-img"><img src="~/Uploads/@cmtProfile" alt=""></div>
                                 <div>
                                     <h5>
                                         <a>  @comment.UserName</a>
@@ -247,6 +249,19 @@
                                             @reply.Content
                                         </p>
                                     </div>
+
+                                   <div class="btn-group" role="group" aria-label="Vote Buttons">
+                                        @if (SignInManager.IsSignedIn(User))
+                                        {
+                                        var user = await UserManager.GetUserAsync(User);
+                                            if(user?.Id== @reply.AuthorId.ToString())
+                                            {
+                                                 <button style="display:none;" type="button" entityid="@reply.Id" class="btn btn-sm ms-1 btn-outline-danger removeCmtReplyBtn remove-btn" data-type="Delete">
+                                                     <i class="bi bi-trash"></i>
+                                                </button>
+                                            }
+                                        }
+                                    </div>
                                 </div>
 
                             </div>
@@ -258,7 +273,7 @@
                     {
                         var user = await UserManager.GetUserAsync(User);
 
-                        <div class="reply-form">
+                        <div class="reply-form ps-2">
                             <h4>Leave a Comments</h4>
                             @* <p>Your email address will not be published. Required fields are marked * </p> *@
                             <form>
@@ -287,10 +302,10 @@
                         <div class="mt-3" id="recent-posts">
 
                             <div class="post-item mt-3">
-                                <img src="assets/img/blog/blog-recent-1.jpg" alt="">
+                                @* <img src="assets/img/blog/blog-recent-1.jpg" alt=""> *@
                                 <div>
-                                    <h4><a href="#">Nihil blanditiis at in nihil autem</a></h4>
-                                    <time datetime="2020-01-01">Jan 1, 2020</time>
+                                    @* <h4><span>Recent Blogs Will appear here.</span></h4> *@
+                                    @* <time datetime="2020-01-01">Jan 1, 2020</time> *@
                                 </div>
                             </div><!-- End recent post item-->
 
@@ -302,12 +317,9 @@
                         <h3 class="sidebar-title">Most Popular Posts</h3>
 
                         <div class="mt-3" id="popular-posts">
-
                             <div class="post-item mt-3">
-                                <img src="assets/img/blog/blog-recent-1.jpg" alt="">
                                 <div>
-                                    <h4><a href="#">Nihil blanditiis at in nihil autem</a></h4>
-                                    <time datetime="2020-01-01">Jan 1, 2020</time>
+                                    @* <h4><span> Popular Blogs will appears here. </span></h4> *@
                                 </div>
                             </div><!-- End recent post item-->
 
@@ -324,13 +336,39 @@
 </section><!-- End Blog Details Section -->
 @* <style href="~/toastr/js/toastr.js" rel="stylesheet"></style> *@
 <script src="~/lib/jquery/dist/jquery.js"></script>
+@* <link rel="stylesheet" href="~/assets/vendor/bootstrap/css/bootstrap.min.css" /> *@
 <script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
 <link href="~/toastr/css/toastr.css" rel="stylesheet" />
 <script src="~/toastr/js/toastr.min.js"></script>
 
 <script type="text/javascript">
     $(document).ready(function () {
+
+     //custom code for carousel
+    var currentIndex = 0;
+    var totalSlides = $('.carousel-item').length;
+
+    // Previous button click event
+    $('.carousel-control-prev').on('click', function() {
+        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+        slideTo(currentIndex);
+    });
+
+    // Next button click event
+    $('.carousel-control-next').on('click', function() {
+        currentIndex = (currentIndex + 1) % totalSlides;
+        slideTo(currentIndex);
+    });
+
+    // Function to slide to a specific index
+    function slideTo(index) {
+        $('.carousel-item').removeClass('active');
+        $('.carousel-item').eq(index).addClass('active');
+    }
+
+
+
+        //code end for carousel
         function fetchData(url, method, data, successCallback, errorCallback) {
             $.ajax({
                 url: url,
@@ -611,12 +649,37 @@
         $(document).on('click', '.removeCmtBtn ', function () {
             var id = $(this).attr('entityid');
             var $commentEntity = $(this).closest('.comment');
+           
             deleteComment(id, $commentEntity);
         });
 
         function deleteComment(id, $commentEntity) {
             $.ajax({
                 url: '/Comment/DeleteComment/' + id,
+                type: 'DELETE',
+                success: function (response) {
+                    toastr.success('Comment removed.');
+                    // toastr.success(response);
+                    // $commentEntity.closest(".comment").remove();
+                    $commentEntity.remove();
+                },
+                error: function (xhr, status, error) {
+                    // Handle error response
+                    toastr.error('Error deleting comment');
+                }
+            });
+        }
+
+       //   remove comments
+        $(document).on('click', '.removeCmtReplyBtn', function () {
+            var id = parseInt($(this).attr('entityid'));
+            var $commentEntity = $(this).closest('.comment');
+            deleteCommentReply(id, $commentEntity);
+        });
+
+        function deleteCommentReply(id, $commentEntity) {
+            $.ajax({
+                url: '/Comment/DeleteCommentReply/' + id,
                 type: 'DELETE',
                 success: function (response) {
                     toastr.success('Comment removed.');

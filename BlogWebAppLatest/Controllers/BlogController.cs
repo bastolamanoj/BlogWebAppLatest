@@ -533,32 +533,72 @@ namespace BlogWebApp.Controllers
             return RedirectToAction("ManageBlog", "Blog"); // Redirect to home page or any other page after removal
         }
 
-        [HttpGet]
-        public IActionResult GetPopularAndRecentPosts()
-        {
-            var recentPosts = _dbContext.Blogs
-            .OrderByDescending(blog => blog.CreationAt)
-            .Take(10)
-            .Select(blog => new
-            {
-                Id = blog.Id,
-                Title = blog.Title,
-                PublishedDate = blog.CreationAt,
-                BlogImage = blog.BlogImages.FirstOrDefault().Url
-            })
-            .ToList();
+        //[HttpGet]
+        //public IActionResult GetPopularAndRecentPosts()
+        //{
+        //    var recentPosts = _dbContext.Blogs
+        //    .OrderByDescending(blog => blog.CreationAt)
+        //    .Take(10)
+        //    .Select(blog => new
+        //    {
+        //        Id = blog.Id,
+        //        Title = blog.Title,
+        //        PublishedDate = blog.CreationAt,
+        //        BlogImage = blog.BlogImages.FirstOrDefault().Url
+        //    })
+        //    .ToList();
 
-            var popularPosts = _dbContext.Blogs
-            .OrderByDescending(blog => blog.CreationAt)
-            .Take(10)
-            .Select(blog => new
-            {
-                Id = blog.Id,
-                Title = blog.Title,
-                PublishedDate = blog.CreationAt,
-                BlogImage = blog.BlogImages.FirstOrDefault().Url
-            })
-            .ToList();
+        //    var popularPosts = _dbContext.Blogs
+        //    .OrderByDescending(blog => blog.CreationAt)
+        //    .Take(10)
+        //    .Select(blog => new
+        //    {
+        //        Id = blog.Id,
+        //        Title = blog.Title,
+        //        PublishedDate = blog.CreationAt,
+        //        BlogImage = blog.BlogImages.FirstOrDefault().Url
+        //    })
+        //    .ToList();
+
+        //    var result = new
+        //    {
+        //        PopularPosts = popularPosts,
+        //        RecentPosts = recentPosts
+        //    };
+
+        //    return Ok(result);
+        //}
+
+
+        // fetch data asynchrounously
+        [HttpGet]
+        public async Task<IActionResult> GetPopularAndRecentPosts()
+        {
+            // Fetch recent posts asynchronously
+            var recentPosts = await _dbContext.Blogs
+                .OrderByDescending(blog => blog.CreationAt)
+                .Take(10)
+                .Select(blog => new
+                {
+                    Id = blog.Id,
+                    Title = blog.Title,
+                    PublishedDate = blog.CreationAt,
+                    BlogImage = blog.BlogImages.FirstOrDefault().Url
+                })
+                .ToListAsync();
+
+            // Fetch popular posts asynchronously
+            var popularPosts = await _dbContext.Blogs
+                .OrderByDescending(blog => blog.CreationAt)
+                .Take(10)
+                .Select(blog => new
+                {
+                    Id = blog.Id,
+                    Title = blog.Title,
+                    PublishedDate = blog.CreationAt,
+                    BlogImage = blog.BlogImages.FirstOrDefault().Url
+                })
+                .ToListAsync();
 
             var result = new
             {
@@ -568,6 +608,7 @@ namespace BlogWebApp.Controllers
 
             return Ok(result);
         }
+
 
     }
 }

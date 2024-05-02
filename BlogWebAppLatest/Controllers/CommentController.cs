@@ -107,5 +107,20 @@ namespace BlogWebApp.Controllers
 
             return Ok(new { status = "200", message = "success" });
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteCommentReply(int id)
+        {
+            var comment = await _dbcontext.CommentReplies.FindAsync(id);
+            if (comment == null)
+            {
+                return NotFound("Comment Reply not found.");
+            }
+
+            _dbcontext.CommentReplies.Remove(comment);
+            await _dbcontext.SaveChangesAsync();
+
+            return Ok(new { status = "200", message = "success" });
+        }
     }
 }

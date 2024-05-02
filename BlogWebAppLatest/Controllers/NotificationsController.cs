@@ -115,6 +115,10 @@ namespace BlogWebApp.Controllers
         public IActionResult GetNotification()
         {
             var currentUser = _userManager.GetUserAsync(User).Result;
+            if (currentUser == null)
+            {
+                return null;
+            }
             var userId = currentUser.Id;
 
             var notifications = (from noti in _context.Notifications
