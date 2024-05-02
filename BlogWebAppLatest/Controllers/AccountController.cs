@@ -397,6 +397,7 @@ namespace BlogWebApp.Controllers
                 // Check if the user deletion was successful
                 if (result.Succeeded)
                 {
+                    TempData["SuccessMessage"] = "Account Deleted Successfully.";
                     await _signInManager.SignOutAsync();
                     return RedirectToAction("Index", "Blog");
                 }
@@ -426,6 +427,7 @@ namespace BlogWebApp.Controllers
                 // Check if the user deletion was successful
                 if (result.Succeeded)
                 {
+                    TempData["SuccessMessage"] = "Account Deleted Successfully.";
                     await _signInManager.SignOutAsync();
                     return RedirectToAction("Index", "Blog");
                 }
