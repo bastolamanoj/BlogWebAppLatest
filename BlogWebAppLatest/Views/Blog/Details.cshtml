@@ -458,7 +458,13 @@
                 contentType: 'application/json',
                 data: JSON.stringify(reaction),
                 success: function (response) {
-
+                    var Username = $(".UserName").text();
+                    var notification = {
+                        Title: 'Comment Notificaion',
+                        Body: `${Username} ${reaction.Type} On Your ${reaction.EntityType}`,
+                        BlogId: $(".blogDetails").attr('blog-id')
+                    }
+                    AddNotification(notification);
                     toastr.success(`${reaction.Type}`);
                 },
                 error: function (xhr, status, error) {
@@ -500,7 +506,8 @@
                     }, 800);
                 },
                 error: function (xhr, status, error) {
-
+                    console.log(comment);
+                    console.log (status,error);
                     toastr.error('Failed to update comment');
                 }
             });
@@ -526,12 +533,14 @@
             var replyMsg = $(this).closest('.replyContainer').find("textarea").val();
             var commentId = $(this).attr("comment-id");
             var username = $(".UserName").text();
+            var $btn =$(this);
             var commentReply = {
                 Content: replyMsg,
                 CommentId: commentId
             };
 
-            var currentDate = new Date();
+            var requiredDate = new Date();
+            var currentDate = requiredDate.toDateString();
             $.ajax({
                 url: '/Comment/AddNestedReply',
                 type: 'POST',
@@ -539,14 +548,22 @@
                 data: JSON.stringify(commentReply),
                 success: function (response) {
                     toastr.success('Reply updated successfully');
-                    location.reload();
-                    $('html, body').animate({
-                        scrollTop: 500
-                    }, 800);
+                    var Username = $(".UserName").text();
+                    var notification = {
+                        Title: 'Comment Notificaion',
+                        Body: `${Username} Comment On Your Blog`,
+                        BlogId: $(".blogDetails").attr('blog-id')
+                    }
+                    AddNotification(notification);
+                    // location.reload();
+                    // $('html, body').animate({
+                    //     scrollTop: 500
+                    // }, 800);
+                    var profile = $(".navbar").find("img").attr("src");
                     var replyhtml = `
-                         <div id="comment-${k}" class="comment comment-reply">
+                         <div id="comment-${6}" class="comment comment-reply">
                                     <div class="d-flex">
-                                        <div class="comment-img"><img src="~/Uploads/" alt=""></div>
+                                            <div class="comment-img"><img src="${profile}" alt=""></div>
                                         <div>
                                                 <h5><a> ${username}</a> </h5>
                                              <time datetime="${currentDate}">${currentDate} </time>
@@ -557,6 +574,10 @@
                                     </div>
 
                                 </div>`;
+
+                   
+                    $btn.closest(".comment").after(replyhtml);
+                   $(".postreplyBtn").closest(".replyContainer").remove();
                     $(".cancelReplyBtn").trigger('click');
 
                     var Username = $(".UserName").text();

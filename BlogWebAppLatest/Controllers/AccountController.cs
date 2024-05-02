@@ -58,18 +58,20 @@ namespace BlogWebApp.Controllers
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
                 //var user = await _userManager.FindByNameAsync(model.Email);
-
+                var user = await _userManager.FindByEmailAsync(model.Email);
                 if (result.Succeeded)
                 {
+                    //HttpContext.Session.SetString("UserName", user.DisplayName);
                     return RedirectToAction("Index", "Blog");
                 }
                 else if (result.IsNotAllowed)
                 {
                     // Optionally, you can check if the user is locked out or needs email confirmation.
                     // For example:
-                    var user = await _userManager.FindByEmailAsync(model.Email);
+                   
                     if (user != null && !await _userManager.IsEmailConfirmedAsync(user))
                     {
+                       
                         // Redirect to a page where the user can confirm their email.
                         return RedirectToAction("EmailConfirmation", "Account");
                     }
@@ -375,6 +377,72 @@ namespace BlogWebApp.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> DeleteBlogger(string? id)
+        {
+            var userId = id;
+            // Check if userId is null or empty
+            if (string.IsNullOrEmpty(userId))
+            {
+                //TempData["SuccessMessage"] = unreadlatestnoti.Body;
+                TempData["ErrorMessage"] = "User ID cannot be null or empty.";
+                //return BadRequest("User ID cannot be null or empty.");
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+            var userrole= await _userManager.GetRolesAsync(user);
+            
+            if (userrole.FirstOrDefault() == "Blogger")
+            {
+                var result = await _userManager.DeleteAsync(user);
+                // Check if the user deletion was successful
+                if (result.Succeeded)
+                {
+                    await _signInManager.SignOutAsync();
+                    return RedirectToAction("Index", "Blog");
+                }
+                
+            }
+            else
+            {
+                var totalUsersCount = await (
+                 from users in _dbcontext.Users
+                 join roleUser in _dbcontext.UserRoles on users.Id equals roleUser.UserId
+                 join role in _dbcontext.Roles on roleUser.RoleId equals role.Id
+                 where role.Name == "Admin"
+                 select user
+                  ).CountAsync();
 
+
+                if (totalUsersCount <= 1)
+                {
+                    TempData["ErrorMessage"] = "Cannot delete the only admin.";
+                    ModelState.AddModelError("", "Cannot delete the only user in the database.");
+                    return RedirectToAction("Index", "Blog");
+                }
+
+                // Remove the user from the database using the UserManager
+                var result = await _userManager.DeleteAsync(user);
+
+                // Check if the user deletion was successful
+                if (result.Succeeded)
+                {
+                    await _signInManager.SignOutAsync();
+                    return RedirectToAction("Index", "Blog");
+                }
+                else
+                {
+                    // If the user deletion failed, display an error message
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                    ModelState.AddModelError("", "Failed");
+                    return RedirectToAction("AddAdmin", "Account");
+                }
+            }
+                return RedirectToAction("Index", "Blog");
+
+
+        }
     }
 }

@@ -91,6 +91,15 @@
             var selectedUrl = "/?page=1&sortOrder=" + val;
             window.location.href = selectedUrl;
         });
+
+        var queryParams = new URLSearchParams(window.location.search);
+        var sortOrder = queryParams.get('sortOrder');
+        var sortSelect = document.querySelector('.sortblog');
+
+        // Set the value of the select element to the sortOrder value
+        if (sortSelect && sortOrder !== null) {
+            sortSelect.value = sortOrder;
+        }
     });
 
 </script>

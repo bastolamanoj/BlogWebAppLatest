@@ -132,10 +132,26 @@ namespace BlogWebApp.Controllers
             // Get all-time data if userId is not provided
             if (month==null)
             {
-                dashboardData.TotalBlogPosts = _dbContext.Blogs.Count();
-                dashboardData.TotalUpvotes = _dbContext.Reactions.Where(a => a.Type == "Upvote").Count();
-                dashboardData.TotalDownvotes = _dbContext.Reactions.Where(a => a.Type == "Downvote").Count();
-                dashboardData.TotalComments = _dbContext.Comments.Count();
+                dashboardData.TotalBlogPosts = await _dbContext.Blogs
+                 .Where(b => b.AuthorId.ToString() == userId)
+                 .CountAsync();
+
+                var userBlogIds = await _dbContext.Blogs
+                    .Where(b => b.AuthorId.ToString() == userId)
+                    .Select(b => b.Id)
+                    .ToListAsync();
+
+                dashboardData.TotalUpvotes = await _dbContext.Reactions
+                    .Where(r => userBlogIds.Contains(r.EntityId) && r.Type == "Upvote")
+                    .CountAsync();
+
+                dashboardData.TotalDownvotes = await _dbContext.Reactions
+                    .Where(r => userBlogIds.Contains(r.EntityId) && r.Type == "Downvote")
+                    .CountAsync();
+
+                dashboardData.TotalComments = await _dbContext.Comments
+                    .Where(c => userBlogIds.Contains(c.BlogId))
+                    .CountAsync();
             }
             else // Filter by userId if provided
             {
@@ -152,10 +168,10 @@ namespace BlogWebApp.Controllers
             
 
                 // Calculate counts
-                dashboardData.TotalBlogPosts = userBlogsQuery.Count();
-                dashboardData.TotalUpvotes = _dbContext.Reactions.Where(a => a.Type == "Upvote" && a.UserId.ToString() == userId && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).Count();
-                dashboardData.TotalDownvotes = _dbContext.Reactions.Where(a => a.Type == "Downvote" && a.UserId.ToString() == userId && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).Count();
-                dashboardData.TotalComments = _dbContext.Comments.Count(comment => comment.CommentedBy.ToString() == userId && comment.CreationDate >= startOfMonth && comment.CreationDate <= endOfMonth);
+                dashboardData.TotalBlogPosts = await userBlogsQuery.CountAsync();
+                dashboardData.TotalUpvotes = await _dbContext.Reactions.Where(a => a.Type == "Upvote" && a.UserId.ToString() == userId && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).CountAsync();
+                dashboardData.TotalDownvotes = await _dbContext.Reactions.Where(a => a.Type == "Downvote" && a.UserId.ToString() == userId && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).CountAsync();
+                dashboardData.TotalComments = await _dbContext.Comments.CountAsync(comment => comment.CommentedBy.ToString() == userId && comment.CreationDate >= startOfMonth && comment.CreationDate <= endOfMonth);
                 }
             }
 
@@ -236,7 +252,7 @@ namespace BlogWebApp.Controllers
                 query = query.Where(b => b.CreationAt >= startOfMonth && b.CreationAt <= endOfMonth);
             }
 
-            var topBlogs = query.OrderByDescending(b =>
+            var topBlogs = await query.OrderByDescending(b =>
                     (_dbContext.Reactions.Count(r => r.EntityId == b.Id && r.Type == "Upvote") -
                     _dbContext.Reactions.Count(r => r.EntityId == b.Id && r.Type == "Downvote")) +
                     _dbContext.Comments.Count(c => c.BlogId == b.Id))
@@ -248,7 +264,7 @@ namespace BlogWebApp.Controllers
                      BlogImage = blog.BlogImages.FirstOrDefault().Url
                  })
                  .Take(10)
-                .ToList();
+                .ToListAsync();
 
         //    var popularPosts = _dbContext.Blogs
         // .OrderByDescending(blog => blog.CreationAt)

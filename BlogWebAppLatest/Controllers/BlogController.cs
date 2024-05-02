@@ -101,16 +101,16 @@ namespace BlogWebApp.Controllers
         [HttpGet("blog-details")]
         public IActionResult Details(string? id)
         {
-            if (id == null || !Guid.TryParse(id, out Guid blogId))
+            if (id == null || id==null)
             {
                 // Handle invalid or missing blog id
                 return RedirectToAction("Error", "Home"); // Redirect to an error page or another action
             }
-
+            var blogId = Guid.Parse(id);
             var user = _userManager.GetUserAsync(User).Result;
             if (user == null)
             {
-                var blogDetails = _dbContext.Blogs
+       var blogDetails = _dbContext.Blogs
           .Where(blog => blog.Id == blogId)
           .Join(_dbContext.BlogCategories,
                 blog => blog.BlogCategoryId,
@@ -406,6 +406,7 @@ namespace BlogWebApp.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             var userid = user.Id;
+            var UserId = Guid.Parse(userid);
             if (ModelState.IsValid)
             {
                 var blog = new Blog
@@ -413,7 +414,7 @@ namespace BlogWebApp.Controllers
                     Title = model.Title,
                     Body = model.Body,
                     BlogCategoryId = model.BlogCategoryId,
-                    AuthorId = (user == null ? Guid.Empty : (Guid.TryParse(userid, out var userId) ? userId : Guid.Empty)),
+                    AuthorId = UserId,
                     //AuthorId = model.AuthorId,
                     CreationAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
@@ -431,7 +432,15 @@ namespace BlogWebApp.Controllers
                     };
                     _dbContext.BlogImages.Add(blogImage);
                 }
+                try
+                {
                 await _dbContext.SaveChangesAsync();
+
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
                 return RedirectToAction("manageblog", new { page = 1 });
 
             }
@@ -456,7 +465,7 @@ namespace BlogWebApp.Controllers
                 blog.Title = model.Title;
                 blog.Body = model.Body;
                 blog.BlogCategoryId = model.BlogCategoryId;
-                blog.AuthorId = (user == null ? Guid.Empty : (Guid.TryParse(userid, out var userId) ? userId : Guid.Empty));
+                blog.AuthorId = Guid.Parse(userid);
                 blog.UpdatedAt = DateTime.Now;
 
                 // Delete existing images

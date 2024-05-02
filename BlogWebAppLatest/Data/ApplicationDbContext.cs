@@ -2,6 +2,8 @@
 using BlogWebApp.Models.IdentityModel;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using System.Reflection.Emit;
 
 namespace BlogWebAppLatest.Data
 {
@@ -21,6 +23,8 @@ namespace BlogWebAppLatest.Data
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<RoleClaim> RoleClaims { get; set; }
         public DbSet<UserClaim> UserClaims { get; set; }
+
+        public DbSet<HubConnection> HubConnections { get; set; }
 
         public DbSet<Blog> Blogs { get; set; }
         public DbSet<BlogImage> BlogImages { get; set; }
@@ -58,9 +62,17 @@ namespace BlogWebAppLatest.Data
             builder.Entity<BlogImage>(e => { e.ToTable(name: "BlogImages"); });
             builder.Entity<Comment>(e => { e.ToTable(name: "Comments"); });
             builder.Entity<CommentReply>(e => { e.ToTable(name: "CommentReplies"); });
-            builder.Entity<Notification>(e => { e.ToTable(name: "Notification"); });
+            builder.Entity<Notification>(e => { e.ToTable(name: "Notification", tb => tb.UseSqlOutputClause(false)); });
+            
+            //builder.Entity<Notification>()
+            //    .Property(e => e.AffectedColumn)
+            //    .ValueGeneratedOnAddOrUpdate()
+            //    .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+
             builder.Entity<Reaction>(e => { e.ToTable(name: "Reactions"); });
             builder.Entity<UserDetail>(e => { e.ToTable(name: "UserDetails"); });
+
+            builder.Entity<HubConnection>(e => { e.ToTable(name: "HubConnections"); });
      
             // Other Custom model entity section
         }

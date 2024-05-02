@@ -35,6 +35,7 @@
                             <img src="~/Uploads/@(@user?.ProfileUrl=="" && @user?.ProfileUrl == null ? "Images/defaultPic.jpg": @user?.ProfileUrl)" alt="Profile" class="rounded-circle">
                             <h2>@user?.DisplayName</h2>
                             <h3>@user?.Position</h3>
+                            <a role="button" class="btn btn-danger removeUserAccount  btn-sm" title="Delete Your Account"><i class="bi bi-trash"></i></a>
                            
                         </div>
                     </div>
@@ -124,7 +125,7 @@
                                                 <div class="pt-2">
                                                     
                                                     @* <a href="#" class="btn btn-primary uploadImg btn-sm" title="Upload new profile image"><i class="bi bi-upload"></i></a> *@
-                                                    <a role="button" class="btn btn-danger removeProfilePic  btn-sm" title="Remove my profile image"><i class="bi bi-trash"></i></a>
+                                                    @* <a role="button" class="btn btn-danger removeProfilePic  btn-sm" title="Remove my profile image"><i class="bi bi-trash"></i></a> *@
                                                 </div>
                                             </div>
                                         </div>
@@ -180,14 +181,14 @@
                                            <div class="row mb-3">
                                     <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Phone</label>
                                     <div class="col-md-8 col-lg-9">
-                                                <input name="phone" type="text" itemid="PhoneNumber" class="form-control" id="PhoneNumber" value="@user.PhoneNumber">
+                                          <input name="PhoneNumber" type="tel" itemid="PhoneNumber" class="form-control" id="PhoneNumber" value="@user.PhoneNumber">
                                     </div>
                                     </div>
 
                                         <div class="row mb-3">
                                             <label for="Email" class="col-md-4 col-lg-3 col-form-label">Email  <span class="text-danger"> * </span> </label>
                                             <div class="col-md-8 col-lg-9">
-                                                <input name="email" type="email" class="form-control" id="Email" value=" @user.Email">
+                                                <input name="Email" type="email" class="form-control" id="Email" value=" @user.Email">
                                             </div>
                                         </div>
 
@@ -225,16 +226,16 @@
         @* $(".uploadImg").click(function () { $("#input-file").trigger('change'); }); *@
 
          var successMessage = '@(TempData["SuccessMessage"])';
-        var errorMessage = '@(TempData["ErrorMessage"])';
+         var errorMessage = '@(TempData["ErrorMessage"])';
 
         if (successMessage) {
             // Display success message using Toastr
-            console.log(successMessage);
+        
             toastr.success(successMessage);
         }
         if (errorMessage) {
             // Display error message using Toastr
-            console.log(successMessage);
+         
             toastr.error(errorMessage);
         }
 
@@ -283,6 +284,28 @@
             previw.src = "";
         });
 
+
+          $(".removeUserAccount").click(function () {
+                var userId = $(".UserId").text().trim();
+              debugger;
+                $.ajax({
+                    type: "POST",
+                    url: "/Account/DeleteBlogger",
+                    data: { id: userId },
+                    success: function (response) {
+                        // Handle success response
+                        // You can redirect or display a success message here
+                      //  alert("User deleted successfully");
+                        window.location.href = response.redirectUrl; 
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        // Handle error response
+                        // You can display an error message or handle the error accordingly
+                        //alert("Error: " + xhr.responseText);
+                    }
+                });
+            });
+       
 
     });
 

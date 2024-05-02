@@ -7,7 +7,12 @@ namespace BlogWebApp.Models
         public int Id { get; set; }
         public string Title { get; set; }   // This the Notification Title
         public string? Body { get; set; }   
-        public Guid UserId { get; set; } // Foreign key referencing the user who receives the notification
+        public string? MessageType { get; set; }
+        public string? Username { get; set; }
+        public Guid UserId { get; set; }
+        
+        public string? ForUserId { get; set; }
+        // Foreign key referencing the user who receives the notification
         //public int? ReactionId { get; set; } // Nullable foreign key referencing the reaction associated with the notification
         public Guid BlogId { get; set; } // Foreign key referencing the blog associated with the notification
         //public int? CommentId { get; set; } // Nullable foreign key referencing the comment associated with the notification

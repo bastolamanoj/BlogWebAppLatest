@@ -35,27 +35,61 @@ namespace BlogWebApp.Controllers
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([FromBody] NotificationVm notification)
         {
+            try
+            {
             var user = _userManager.GetUserAsync(User).Result;
             var userid = user.Id;
-            Notification noti = new Notification()
+                var forUserId = _context.Blogs
+                .Where(b => b.Id == notification.BlogId)
+                .Select(b => b.AuthorId)
+                .FirstOrDefault().ToString();
+                Notification noti = new Notification()
             {
                 Title=notification.Title,
                 Body= notification.Body,
-                IsRead= false,
+                MessageType= "Personal",
+                ForUserId= forUserId,
+                IsRead = false,
                 BlogId= notification.BlogId,
                 UserId = Guid.Parse(userid),
                 CreatedAt= DateTime.Now,
                 UpdatedAt= DateTime.Now,
 
             };
-            if (ModelState.IsValid)
-            {
-                _context.Notifications.Add(noti);
-                await _context.SaveChangesAsync();
-                
+                if (ModelState.IsValid)
+                {
+                    using (var transaction = _context.Database.BeginTransaction())
+                    {
+                        try
+                        {
+                            // Disable triggers
+                            //await _context.Database.ExecuteSqlRawAsync("DISABLE TRIGGER ALL ON dbo.Notification");
+
+                            // Add the notification
+                            _context.Notifications.Add(noti);
+                            await _context.SaveChangesAsync();
+
+                            // Commit the transaction
+                            await transaction.CommitAsync();
+
+                            // Re-enable triggers
+                            //await _context.Database.ExecuteSqlRawAsync("ENABLE TRIGGER ALL ON dbo.Notification");
+                        }
+                        catch (Exception)
+                        {
+                            // Rollback the transaction if an exception occurs
+                            await transaction.RollbackAsync();
+                            throw;
+                        }
+                    }
+                }
+                return Ok(new { status = 200, message = "success" });
+
             }
-            //ViewData["BlogId"] = new SelectList(_context.Blogs, "Id", "Body", notification.BlogId);
-            return Ok(new {status=200, message="success"});
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         // GET: Notifications/Delete/5
@@ -87,6 +121,7 @@ namespace BlogWebApp.Controllers
                                  join blog in _context.Blogs on noti.BlogId equals blog.Id
                                  join user in _context.Users on blog.AuthorId.ToString() equals user.Id
                                  where blog.AuthorId == Guid.Parse(userId)
+                                 orderby noti.CreatedAt descending
                                  select new NotificationVm
                                  {
                                      Id = noti.Id,
@@ -103,7 +138,12 @@ namespace BlogWebApp.Controllers
                 .Count(noti => !noti.IsRead);
             if (notifications.Count() > 0)
             {
-            notifications[0].TotalNotification = unreadNotificationCount;
+                var unreadlatestnoti = notifications.Where(a => !a.IsRead).FirstOrDefault();
+                if(unreadlatestnoti != null)
+                {
+                  TempData["SuccessMessage"] = unreadlatestnoti.Body;
+                }
+                notifications[0].TotalNotification = unreadNotificationCount;
 
             }
 
@@ -114,6 +154,51 @@ namespace BlogWebApp.Controllers
 
             return Ok(new { notifications = notifications });
         }
+
+        //[HttpGet]
+        //public async Task<IActionResult> GetNotification()
+        //{
+        //    var currentUser = await _userManager.GetUserAsync(User);
+        //    if (currentUser == null)
+        //    {
+        //        // Handle the case where the user is not found
+        //        return NotFound("User not found");
+        //    }
+
+        //    var userId = currentUser.Id;
+
+        //    var notifications = (from noti in _context.Notifications
+        //                         join blog in _context.Blogs on noti.BlogId equals blog.Id
+        //                         join user in _context.Users on blog.AuthorId.ToString() equals user.Id
+        //                         where blog.AuthorId == Guid.Parse(userId)
+        //                         orderby noti.CreatedAt descending
+        //                         select new NotificationVm
+        //                         {
+        //                             Id = noti.Id,
+        //                             Title = noti.Title,
+        //                             Body = noti.Body,
+        //                             Username = user.DisplayName,
+        //                             Url = user.ProfileUrl,
+        //                             IsRead = noti.IsRead,
+        //                             BlogId = blog.Id,
+        //                             NotificationDate = noti.CreatedAt
+        //                         }).ToList();
+
+
+        //    var unreadNotificationCount = notifications.Count(noti => !noti.IsRead);
+        //    if (notifications.Any())
+        //    {
+        //        TempData["SuccessMessage"] = notifications[0].Body;
+        //        notifications[0].TotalNotification = unreadNotificationCount;
+        //    }
+
+        //    if (!notifications.Any())
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return Ok(new { notifications = notifications });
+        //}
 
         [HttpPost]
         public async Task<IActionResult> UdpateNotificationStaus([FromBody] List<int> notificationIds)

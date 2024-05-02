@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogWebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240426050125_useridaddedtocomment")]
-    partial class useridaddedtocomment
+    [Migration("20240430114020_adduseridinhubconnection")]
+    partial class adduseridinhubconnection
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -125,7 +125,6 @@ namespace BlogWebApp.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AuthorId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid>("BlogId")
@@ -184,6 +183,31 @@ namespace BlogWebApp.Migrations
                     b.HasIndex("CommentId");
 
                     b.ToTable("CommentReplies", "dbo");
+                });
+
+            modelBuilder.Entity("BlogWebApp.Models.HubConnection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ConnectionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HubConnections", "dbo");
                 });
 
             modelBuilder.Entity("BlogWebApp.Models.IdentityModel.Role", b =>
@@ -427,8 +451,14 @@ namespace BlogWebApp.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ForUserId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
+
+                    b.Property<string>("MessageType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -442,6 +472,9 @@ namespace BlogWebApp.Migrations
 
                     b.Property<string>("UserId1")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -570,9 +603,7 @@ namespace BlogWebApp.Migrations
                 {
                     b.HasOne("BlogWebApp.Models.IdentityModel.User", "Author")
                         .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AuthorId");
 
                     b.HasOne("BlogWebApp.Models.Blog", "Blog")
                         .WithMany("Comments")

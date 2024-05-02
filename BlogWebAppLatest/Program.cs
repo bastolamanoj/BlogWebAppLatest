@@ -1,18 +1,29 @@
 using BlogWebApp.ExceptionHandling;
 using BlogWebApp.HelperClass;
+using BlogWebApp.Hubs;
+using BlogWebApp.MiddlewareExtensions;
 using BlogWebApp.Models.IdentityModel;
+using BlogWebApp.SubscribeTableDependencies;
 using BlogWebApp.ViewModel;
 using BlogWebAppLatest.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using SignalRYoutube.Repos;
 using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+var notificationConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'NotificationConnection' not found.");
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(notificationConnectionString),
+    ServiceLifetime.Singleton);
+
+// Register ApplicationDbContext as scoped for other services
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
@@ -23,7 +34,15 @@ builder.Services.AddIdentity<User, Role>(options => options.SignIn.RequireConfir
      .AddSignInManager()
     .AddRoles<Role>();
 
-builder.Services.AddControllersWithViews();
+// builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
+
+//DI
+//builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+//builder.Services.AddSingleton<NotificationHub>();
+//builder.Services.AddSingleton<SubscribeNotificationTableDependency>();
+
+
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
@@ -31,7 +50,12 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 //builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+// Session
+//builder.Services.AddDistributedMemoryCache();
+//builder.Services.AddSession();
+builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -55,6 +79,8 @@ app.UseRouting();
 //app.UseRedirectMiddleware();
 
 app.UseAuthorization();
+//app.MapHub<NotificationHub>("/notificationHub");
+
 app.UseExceptionHandler("/Home/Error");
 
 #pragma warning disable ASP0014 // Suggest using top level route registrations
@@ -79,5 +105,6 @@ app.UseEndpoints(endpoints =>
 
 });
 #pragma warning restore ASP0014 // Suggest using top level route registrations
+//app.UseSqlTableDependency<SubscribeNotificationTableDependency>(notificationConnectionString);
 
 app.Run();
