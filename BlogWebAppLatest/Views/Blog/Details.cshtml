@@ -239,12 +239,12 @@
                         @foreach (var reply in comment.CommentReplies)
                         {
                             k++;
-                            <div id="comment-@k" class="comment comment-reply">
+                            <div id="comment-@k" class="comment comment-reply comment-@i">
                                 <div class="d-flex">
                                     <div class="comment-img"><img src="~/Uploads/@reply.Url" alt=""></div>
                                     <div>
                                         <h5><a> @reply.UserName</a> @* <a role="button" comment-id="@comment.CommentId" class="reply cmtReplyBtn"><i class="bi bi-reply-fill"></i> Reply</a> *@</h5>
-                                        <time datetime=" @comment.CreationDate"> @reply.Timestamp.ToString("dd MMM yyyy") </time>
+                                        <time datetime="@comment.CreationDate"> @reply.Timestamp.ToString("dd MMM yyyy") </time>
                                         <p>
                                             @reply.Content
                                         </p>
@@ -662,6 +662,8 @@
                     // toastr.success(response);
                     // $commentEntity.closest(".comment").remove();
                     $commentEntity.remove();
+                    var cmtId = $commentEntity.attr("id");
+                    $(`.${cmtId}`).remove();
                 },
                 error: function (xhr, status, error) {
                     // Handle error response
