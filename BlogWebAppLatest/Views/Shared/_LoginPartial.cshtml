@@ -17,7 +17,7 @@
         <a class="nav-link nav-profile d-flex  text-white align-items-center pe-0" href="#" data-bs-toggle="dropdown">
             <img src="~/Uploads/@(user?.ProfileUrl==null? "Images/defaultPic.jpg": user?.ProfileUrl)" alt="Profile" style="width:50px; height:50px;" class="rounded-circle">
             <span class=" d-md-block dropdown-toggle ps-2 UserName"> @user?.DisplayName </span>
-            <span class="d-none d-md-block dropdown-toggle ps-2 UserId" style="display:none;"> @user?.Id </span>
+            <span class="d-none d-md-block dropdown-toggle ps-2 UserId" style="display:none!important;"> @user?.Id </span>
         </a><!-- End Profile Iamge Icon -->
 
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
