@@ -131,6 +131,23 @@
     <!-- Template Main JS File -->
     <script src="~/assets/js/frontendmain.js"></script>
 
+        <link href="~/toastr/css/toastr.css" rel="stylesheet">
+
+    <script src="~/toastr/js/toastr.js"></script>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            toastr.success('@TempData["SuccessMessage"]');
+        </script>
+    }
+    else if (TempData["ErrorMessage"] != null)
+    {
+        <script>
+            toastr.error('@TempData["ErrorMessage"]');
+        </script>
+    }
+
     <!-- Template Main CSS File -->
     @* <link href="~/assets/css/style.css" rel="stylesheet"> *@
 

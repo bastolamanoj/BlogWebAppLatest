@@ -238,7 +238,7 @@ namespace BlogWebApp.Controllers
                 }
                 return View(model);
             }
-
+            TempData["SuccessMessage"] = "Your Password has been Changed";
             //await _signInManager.RefreshSignInAsync(user);
             //return RedirectToAction("Index", "Home");
             await _signInManager.SignOutAsync();
@@ -279,6 +279,7 @@ namespace BlogWebApp.Controllers
             if (result.Succeeded)
             {
                 TempData["SuccessMessage"] = "Your Password has been reset successfully.";
+                await _signInManager.SignOutAsync();
                 return RedirectToAction("Login", "Account");
             }
 
@@ -326,6 +327,7 @@ namespace BlogWebApp.Controllers
             // Check if userId is null or empty
             if (string.IsNullOrEmpty(userId))
             {
+                TempData["ErrorMessage"] = "User ID cannot be null or empty.";
                 ModelState.AddModelError("", "User ID cannot be null or empty.");
                 //return BadRequest("User ID cannot be null or empty.");
             }
@@ -351,7 +353,7 @@ namespace BlogWebApp.Controllers
 
             if (totalUsersCount <= 1)
             {
-                TempData["ErrorMessage"] = "Cannot delete the only admin.";
+                TempData["ErrorMessage"] = "Cannot delete because you are the only admin.";
                 ModelState.AddModelError("", "Cannot delete the only user in the database.");
                 return RedirectToAction("manageadmin", "Account");
             }
@@ -362,8 +364,24 @@ namespace BlogWebApp.Controllers
             // Check if the user deletion was successful
             if (result.Succeeded)
             {
+                var blogsToRemove = _dbcontext.Blogs.Where(blog => blog.AuthorId.ToString() == user.Id);
+                _dbcontext.Blogs.RemoveRange(blogsToRemove);
+
+                foreach (var blog in blogsToRemove)
+                {
+                    // Remove associated comments
+                    var commentsToRemove = _dbcontext.Comments.Where(comment => comment.BlogId == blog.Id);
+                    _dbcontext.Comments.RemoveRange(commentsToRemove);
+
+                    // Remove associated replies
+                    //var repliesToRemove = _dbcontext.CommentReplies.Where(reply => reply.comment.BlogId == blog.Id);
+                    //_dbcontext.CommentReplies.RemoveRange(repliesToRemove);
+                }
+
+
                 // Redirect the user to a suitable action, such as a list of users or another appropriate page
-                return RedirectToAction("AddAdmin", "Account"); // Redirect to a user management page
+                TempData["SuccessMessage"] = "Admin Deleted";
+                return RedirectToAction("ManageAdmin", "Account"); // Redirect to a user management page
             }
             else
             {
@@ -397,6 +415,21 @@ namespace BlogWebApp.Controllers
                 // Check if the user deletion was successful
                 if (result.Succeeded)
                 {
+                    var blogsToRemove = _dbcontext.Blogs.Where(blog => blog.AuthorId.ToString() ==user.Id );
+                    _dbcontext.Blogs.RemoveRange(blogsToRemove);
+
+                    foreach (var blog in blogsToRemove)
+                    {
+                        // Remove associated comments
+                        var commentsToRemove = _dbcontext.Comments.Where(comment => comment.BlogId == blog.Id);
+                        _dbcontext.Comments.RemoveRange(commentsToRemove);
+
+                        // Remove associated replies
+                        var repliesToRemove = _dbcontext.CommentReplies.Where(reply => reply.comment.BlogId == blog.Id);
+                        //_dbcontext.CommentReplies.RemoveRange(repliesToRemove);
+                    }
+
+
                     TempData["SuccessMessage"] = "Account Deleted Successfully.";
                     await _signInManager.SignOutAsync();
                     return RedirectToAction("Index", "Blog");

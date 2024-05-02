@@ -12,6 +12,27 @@
 @*     <li class="nav-item">
         <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
     </li> *@
+    <li class="nav-item dropdown">
+
+        <a class="nav-link nav-icon notificationBell" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-bell"></i>
+            <span class="badge bg-danger badge-number">0  </span>
+        </a><!-- End Notification Icon -->
+
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications" style="max-height:420px; width:300px;  overflow-y:scroll;">
+            <li class="dropdown-header">
+                @* You have 4 new notifications *@
+                @*  <a href="#"><span class="badge rounded-pill bg-primary p-2 ms-2">View all</span></a> *@
+            </li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+
+        </ul><!-- End Notification Dropdown Items -->
+
+    </li>
+
+    <!-- End Notification Nav -->
     <li class="nav-item dropdown pe-3">
 
         <a class="nav-link nav-profile d-flex  text-white align-items-center pe-0" href="#" data-bs-toggle="dropdown">
@@ -87,3 +108,84 @@ else
     </li>
 }
 @* </ul> *@
+
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $.ajax({
+            url: '/Notifications/GetNotification',
+            type: 'GET',
+            success: function (data) {
+                renderPosts(data.notifications, '.notifications');
+            },
+            error: function (xhr, status, error) {
+                // Handle error
+                $(".badge-number").text(0);
+                console.error('Error fetching popular and TotalNotification posts:', error);
+            }
+        });
+        function renderPosts(posts, containerSelector) {
+
+            var $container = $(containerSelector);
+            $container.empty();
+            $(".badge-number").text(posts[0].totalNotification);
+
+            $.each(posts, function (index, post) {
+
+                var postHtml = `
+                                <li class="notification-item" id="${post.id}">
+                                   <a href="/blog-details?id=${post.blogId}">
+                                           <img src="/Uploads/${post.url}" alt="Profile" style="height:40px;width:40px;"  class="rounded-circle">
+                                        <i class="bi bi-exclamation-circle text-success"></i>
+                                <div>
+                                        <h6>${post.username}</h6>
+                                           <span style="font-size: 13px;
+        margin-bottom: 3px;
+        color: #919191;">${post.body}</span> <br/>
+                                           <span style="    font-size: 13px;
+        margin-bottom: 3px;
+        color: #919191;">${post.notificationDate}</span>
+                                </div>
+                                </a>
+                            </li>
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                    `;
+
+                $container.append(postHtml);
+            });
+        }
+
+        $(".notificationBell").click(function () {
+            var notificationIds = [];
+            var noOFNoti = $(".badge-number").text().trim();
+            if (noOFNoti == "0") {
+                return;
+            }
+            $(".notifications").find(".notification-item").each(function () {
+                var notificationId = parseInt($(this).attr("id"));
+                notificationIds.push(notificationId);
+            });
+
+            $.ajax({
+                url: '/Notifications/UdpateNotificationStaus/',
+                type: 'POST',
+                contentType: "application/json",
+                data: JSON.stringify(notificationIds),
+                success: function (response) {
+                    toastr.success('Notifiction Read.');
+                    $(".badge-number").text(0);
+                },
+                error: function (xhr, status, error) {
+
+    @* toastr.error('Error'); *@
+                    }
+            });
+        });
+    });
+
+</script>

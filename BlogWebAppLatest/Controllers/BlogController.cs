@@ -127,6 +127,7 @@ namespace BlogWebApp.Controllers
                          BlogCategoryId = bc.Blog.BlogCategoryId,
                          PublishedDate = bc.Blog.CreationAt,
                          CategoryName = bc.Category.Name, // Populate the category name
+                         IsMyBlog="False",
                          BlogImages = bc.Blog.BlogImages.Select(bi => new BlogImageVM
                          {
                              ImageName = bi.ImageName,
@@ -220,6 +221,7 @@ namespace BlogWebApp.Controllers
                                    BlogCategoryId = bc.Blog.BlogCategoryId,
                                    PublishedDate = bc.Blog.CreationAt,
                                    CategoryName = bc.Category.Name, // Populate the category name
+                                   IsMyBlog=  bc.Blog.AuthorId.ToString() == user.Id ? "True": "False",
                                    BlogImages = bc.Blog.BlogImages.Select(bi => new BlogImageVM
                                    {
                                        ImageName = bi.ImageName,

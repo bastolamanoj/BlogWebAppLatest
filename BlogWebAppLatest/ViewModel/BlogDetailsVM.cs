@@ -9,6 +9,7 @@ namespace BlogWebApp.ViewModel
         public string Title { get; set; }
         [Required]
         public string Body { get; set; }
+        public string? IsMyBlog { get; set; }
         public string? CategoryName { get; set; }
         public DateTime PublishedDate { get; set; }
         public int? BlogCategoryId { get; set; }

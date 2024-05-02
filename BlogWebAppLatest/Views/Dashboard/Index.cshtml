@@ -33,10 +33,10 @@
                 <!-- Dashboard visualization of overall post, comment, and reaction -->
                 <div class="col-lg-10">
                     <div class="row row-reverse">
-                        <div class="col-xl-12 col-md-12 mb-3">
+                        <div class="col-xl-12 ms-2 col-md-12 row mb-3">
                             @if (role.FirstOrDefault() == "Admin")
                             {
-                                <label class="col-sm-5 col-form-label">Filter By Month</label>
+                                <label class="col-sm-5 col-form-label">(Overall)  Filter By Month</label>
                                 <div class="col-sm-6">
 
                                     <select class="form-select filterTotal" aria-label="Default select example">
@@ -155,7 +155,7 @@
                     @* this dashboard data for logged in blogger or  *@
                     <div class="row col-xl-12 col-md-12 mb-3">
                         <div class="row col-xl-12 col-md-12">
-                            <label class="col-sm-6 col-form-label text-bold">Filter By Month</label>
+                            <label class="col-sm-6 col-form-label text-bold">(Individual)  Filter By Month</label>
                             <div class="col-sm-6">
                                 <select class="form-select filterBloggerTotal" aria-label="Default select example">
                                     <option selected value="null">All</option>
@@ -313,7 +313,7 @@
 
                         <div class="card-body">
                             <div class="row card-title">
-                                <label class="col-sm-5 col-form-label"> Top Ten Bloggers <span> | All Time</span> </label>
+                                <label class="col-sm-5 col-form-label"> Top Ten Bloggers <span> |</span> </label>
                                 <div class="col-sm-6">
 
                                     <select class="form-select filterBlogger" aria-label="Default select example">
@@ -365,6 +365,17 @@
                 var selectedUrl = "/dashboard/?month=" + val;
                 window.location.href = selectedUrl;
             });
+        }
+
+
+        @* code for upadte selected data*@
+             var queryParams = new URLSearchParams(window.location.search);
+        var sortOrder = queryParams.get('month');
+        var sortSelect = document.querySelector('.filterTotal');
+
+        // Set the value of the select element to the sortOrder value
+        if (sortSelect && sortOrder !== null) {
+            sortSelect.value = sortOrder;
         }
 
         function GetDashboardDataforBloggers(month) {

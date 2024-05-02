@@ -139,7 +139,7 @@
 
                     <h2 class="title"> @Model.Title </h2>
 
-                    <div class="meta-top blogDetails" blog-id="@Model.Id">
+                    <div class="meta-top blogDetails" blog-id="@Model.Id" IsMyBlog="@Model.IsMyBlog">
                         @*  <div class="d-flex justify-content-center">
 
                         </div> *@
@@ -159,7 +159,7 @@
                                     </div>
                                 </div>
                             </li>
-                            <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="#"> @Model.BlogUser.UserName </a></li>
+                            <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="#"> @Model.BlogUser?.UserName </a></li>
                             <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="#"><time datetime="2020-01-01"> @Model.PublishedDate.ToString("dd MMM yyyy") </time></a></li>
                             <li class="d-flex align-items-center"><i class="bi bi-chat-dots"></i> <a>@Model.TotalComments Comments</a></li>
                         </ul>
@@ -417,7 +417,7 @@
 
         // Function to handle toggling of vote buttons
         function toggleVote($btn, type) {
-            debugger;
+            
             var $otherBtn = (type === 'Upvote') ? $btn.closest(".btn-group").find(".downvote-btn") : $btn.closest(".btn-group").find(".upvote-btn");
             var $voteCount = (type === 'Upvote') ? $btn.find('#upvote-count') : $btn.find('#downvote-count');
             var $otherVoteCount = (type === 'Upvote') ? $btn.closest(".btn-group").find('#downvote-count') : $btn.closest(".btn-group").find('#upvote-count');
@@ -464,8 +464,11 @@
                         Body: `${Username} ${reaction.Type} On Your ${reaction.EntityType}`,
                         BlogId: $(".blogDetails").attr('blog-id')
                     }
-                    AddNotification(notification);
-                    toastr.success(`${reaction.Type}`);
+                    var isMyBlog = $(".blogDetails").attr("IsMyBlog");
+                    if (isMyBlog == "False") {
+                        AddNotification(notification);
+                        toastr.success(`${reaction.Type}`);
+                    }
                 },
                 error: function (xhr, status, error) {
                     toastr.error(`Not Reacted`);
@@ -499,7 +502,11 @@
                         Body: `${Username} Comment On Your Blog`,
                         BlogId: $(".blogDetails").attr('blog-id')
                     }
-                    AddNotification(notification);
+                    debugger;
+                     var isMyBlog = $(".blogDetails").attr("IsMyBlog");
+                    if (isMyBlog == "False") {
+                        AddNotification(notification); 
+                    }
                     location.reload();
                     $('html, body').animate({
                         scrollTop: 500
@@ -554,7 +561,11 @@
                         Body: `${Username} Comment On Your Blog`,
                         BlogId: $(".blogDetails").attr('blog-id')
                     }
-                    AddNotification(notification);
+                     var isMyBlog = $(".blogDetails").attr("IsMyBlog");
+                    if (isMyBlog == "False") {
+                        AddNotification(notification);
+                    }
+                   
                     // location.reload();
                     // $('html, body').animate({
                     //     scrollTop: 500

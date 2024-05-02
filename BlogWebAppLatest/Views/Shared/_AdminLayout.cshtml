@@ -92,7 +92,8 @@
    }
 
     <!-- JS for file picker -->
-    <!-- Template Main JS File -->
+
+    <link href="~/toastr/css/toastr.css" rel="stylesheet">
     <script src="~/assets/js/main.js"></script>
       <script src="~/custom/js/CustomScript.js"></script>
       <script src="~/toastr/js/toastr.js"></script>
@@ -110,6 +111,18 @@
             </script>
         }
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            toastr.success('@TempData["SuccessMessage"]');
+        </script>
+    }
+    else if (TempData["ErrorMessage"] != null)
+    {
+        <script>
+            toastr.error('@TempData["ErrorMessage"]');
+        </script>
+    }
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
