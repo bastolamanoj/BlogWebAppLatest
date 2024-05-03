@@ -142,11 +142,11 @@ namespace BlogWebApp.Controllers
 
 
                 dashboardData.TotalUpvotes = await _dbContext.Reactions
-                    .Where(r => userBlogIds.Contains(r.UserId) && r.Type == "Upvote")
+                    .Where(r => userBlogIds.Contains(r.EntityId) && r.Type == "Upvote")
                     .CountAsync();
 
                 dashboardData.TotalDownvotes = await _dbContext.Reactions
-                    .Where(r => userBlogIds.Contains(r.UserId) && r.Type == "Downvote")
+                    .Where(r => userBlogIds.Contains(r.EntityId) && r.Type == "Downvote")
                     .CountAsync();
 
                 dashboardData.TotalComments = await _dbContext.Comments
@@ -169,8 +169,8 @@ namespace BlogWebApp.Controllers
 
                 // Calculate counts
                 dashboardData.TotalBlogPosts = await userBlogsQuery.CountAsync();
-                dashboardData.TotalUpvotes = await _dbContext.Reactions.Where(a => a.Type == "Upvote" && a.UserId.ToString() == userId && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).CountAsync();
-                dashboardData.TotalDownvotes = await _dbContext.Reactions.Where(a => a.Type == "Downvote" && a.UserId.ToString() == userId && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).CountAsync();
+                dashboardData.TotalUpvotes = await _dbContext.Reactions.Where(a => a.Type == "Upvote" && userBlogIds.Contains(a.EntityId) && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).CountAsync();
+                dashboardData.TotalDownvotes = await _dbContext.Reactions.Where(a => a.Type == "Downvote" && userBlogIds.Contains(a.EntityId) && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).CountAsync();
                 dashboardData.TotalComments = await _dbContext.Comments.CountAsync(comment => userBlogIds.Contains(comment.BlogId) && comment.CreationDate >= startOfMonth && comment.CreationDate <= endOfMonth);
                 }
             }
