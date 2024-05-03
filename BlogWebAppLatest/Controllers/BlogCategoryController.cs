@@ -65,7 +65,8 @@ namespace BlogWebApp.Controllers
             {
                 _context.Add(blogCategory);
                 await _context.SaveChangesAsync();
-                ViewBag.AlertMessage = "Category Added Successfully.";
+                //ViewBag.AlertMessage = "Category Added Successfully.";
+                TempData["SuccessMessage"] = "Category Added Successfully.";
                 ViewBag.AlertType = "success"; // or "error", "warning"
                 return RedirectToAction(nameof(Index));
             }
@@ -106,11 +107,13 @@ namespace BlogWebApp.Controllers
                 {
                     _context.Update(blogCategory);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Category Updated Successfully.";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!BlogCategoryExists(blogCategory.Id))
                     {
+                        TempData["ErrorMessage"] = "Category Failed to update.";
                         return NotFound();
                     }
                     else
@@ -151,7 +154,7 @@ namespace BlogWebApp.Controllers
             {
                 _context.BlogCategories.Remove(blogCategory);
             }
-
+            TempData["SuccessMessage"] = "Category Removed Successfully.";
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
