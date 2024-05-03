@@ -504,9 +504,9 @@
                         BlogId: $(".blogDetails").attr('blog-id')
                     }
                     var isMyBlog = $(".blogDetails").attr("IsMyBlog");
+                     toastr.success(`${reaction.Type}ed Successfully`);
                     if (isMyBlog == "False") {
                         AddNotification(notification);
-                        toastr.success(`${reaction.Type}`);
                     }
                 },
                 error: function (xhr, status, error) {
