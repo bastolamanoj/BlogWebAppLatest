@@ -442,7 +442,7 @@
                 type: 'DELETE',
                 success: function (response) {
                     $btn.removeClass("active");
-                    $btn.find("span").text(0);
+                    $btn.find("span").text(parseInt($btn.find("span").text().trim() -1 ));
                     toastr.success('Reaction removed.');
 
                 },
