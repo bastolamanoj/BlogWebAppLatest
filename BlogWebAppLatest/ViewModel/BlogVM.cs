@@ -7,16 +7,18 @@ namespace BlogWebApp.ViewModel
     public class BlogVM
     {
         
-         public int? SN { get; set; }
+        public int? SN { get; set; }
         public Guid Id { get; set; }
         [Required]
         public string Title { get; set; }
         [Required]
         public string Body { get; set; }
+        public string? IsOwnBlog { get; set; }
+        public string? UserRole { get; set; }
         public string? CategoryName { get; set; }
         public DateTime PublishedDate { get; set; }
         public int? BlogCategoryId { get; set; }
-        public List<BlogImageVM> BlogImages { get; set; }
+        public List<BlogImageVM>? BlogImages { get; set; }
         public int? TotalComments { get; set; }
         public int? TotalUpvote { get; set; }
         public int? TotalDownvote { get; set; }

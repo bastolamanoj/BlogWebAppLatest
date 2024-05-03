@@ -1,13 +1,16 @@
-﻿@using BlogWebApp.ViewModel
+﻿
+@using BlogWebApp.ViewModel
 @using X.PagedList.Mvc.Core;
 @model X.PagedList.IPagedList<BlogVM>
 @* @model List<BlogWebApp.ViewModel.BlogVM> *@
-
 @{
     Layout = "_AdminLayout";
     TempData["Title"] = "Manage Blog";
 }
-
+@using Microsoft.AspNetCore.Identity
+@using BlogWebApp.Models.IdentityModel
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
 
 <div class="pagetitle">
     <h1> Blog </h1>
@@ -31,77 +34,174 @@
                         <a asp-action="AddBlog">Create New</a>
                     </p>
                     <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>
-                                   SN 
-                                </th>
-                                <th>
-                                   Title
-                                </th>
-                               @*  <th>
-                                   Body
-                                </th>  *@
-                                <th>
-                                   Category
-                                </th>
-                                <th>
-                                   Published Date
-                                </th>
-                                <th>
-                                   Images
-                                </th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @{
-                                var count = 0;
-                            }
-                            @foreach (var item in Model)
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            var user = await UserManager.GetUserAsync(User);
+                            var role = await UserManager.GetRolesAsync(user);
+                            if (role.FirstOrDefault() == "Admin")
                             {
-                                count++;
-                                <tr>
-                                    <td> @count </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Title)
-                                    </td>
-                                   @*  <td>
-                                       @Html.Raw(item.Body)
-                                    </td>  *@ 
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.CategoryName)
-                                    </td>
-                                    <td>
-                                         @item.PublishedDate
-                                    </td>
-                                    <td>
-                                       @*  <ul> *@
-                                            @foreach (var image in item.BlogImages)
-                                            {
-                                               @*  <li> *@
-                                                    <img width="50px" height="50px" src="/uploads/@image.Url" alt="/uploads/@image.ImageName" />
-                                                 @*    </li> *@
-                                            }
-                                          @*   </ul> *@
-                                    </td>
-                                  @*   <td>
-                                        @Html.DisplayFor(modelItem => item.CreatedAt)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.UpdatedAt)
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                SN
+                                            </th>
+                                            <th>
+                                                Title
+                                            </th>
+
+                                            <th>
+                                                Category
+                                            </th>
+                                            <th>
+                                                Published Date
+                                            </th>
+                                            <th>
+                                                Role
+                                            </th>
+                                            <th>
+                                                Images
+                                            </th>
+                                            <th>
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            var count = 0;
+                                        }
+                                        @foreach (var item in Model)
+                                        {
+                                            count++;
+                                            <tr>
+                                                <td> @count </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Title)
+                                                </td>
+                                                @*  <td>
+                                    @Html.Raw(item.Body)
+                                    </td>  *@
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.CategoryName)
+                                                </td>
+                                                <td>
+                                                    @item.PublishedDate
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.UserRole)
+                                                </td>
+                                                <td>
+                                                    @*  <ul> *@
+                                                    @foreach (var image in item.BlogImages)
+                                                    {
+                                                        @*  <li> *@
+                                                        <img width="50px" height="50px" src="/uploads/@image.Url" alt="/uploads/@image.ImageName" />
+                                                        @*    </li> *@
+                                                    }
+                                                    @*   </ul> *@
+                                                </td>
+
+                                                @* <td>
+                                    @Html.DisplayFor(modelItem => item.UpdatedAt)
                                     </td> *@
-                                    <td>
-                                        <a asp-action="Edit" class="btn btn-success btn-sm"  title="Edit Blog"  asp-route-id="@item.Id"> <i class="bi bi-pencil"></i></a> |
-                                        <a asp-action="Details" class="btn btn-info btn-sm"  title="Details"  asp-route-id="@item.Id"><i class="bi bi-info"></i></a> |
-                                            <a asp-action="RemoveBlog" class="btn btn-danger btn-sm"  title="Remove Remove" asp-route-id="@item.Id"> <i class="bi bi-trash"></i> </a>
-                                       
-                                    </td>
-                                </tr>
+                                                <td>
+                                                    @if (item.UserRole == "Admin")
+                                                    {
+                                                    <a asp-action="Edit" class="btn btn-success btn-sm" title="Edit Blog" asp-route-id="@item.Id"> <i class="bi bi-pencil"></i></a> 
+                                                        
+                                                    }
+                                                    |<a asp-action="Details" class="btn btn-info btn-sm" title="Details" asp-route-id="@item.Id"><i class="bi bi-info"></i></a> |
+                                                    <a asp-action="RemoveBlog" class="btn btn-danger btn-sm" title="Remove Blog" asp-route-id="@item.Id"> <i class="bi bi-trash"></i> </a>
+
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+
                             }
-                        </tbody>
-                    </table>
+                            else
+                            {
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                SN
+                                            </th>
+                                            <th>
+                                                Title
+                                            </th>
+
+                                            <th>
+                                                Category
+                                            </th>
+                                            <th>
+                                                Published Date
+                                            </th>
+                                           @*  <th>
+                                                Role
+                                            </th> *@
+                                            <th>
+                                                Images
+                                            </th>
+                                            <th>
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            var count = 0;
+                                        }
+                                        @foreach (var item in Model)
+                                        {
+                                            count++;
+                                            <tr>
+                                                <td> @count </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Title)
+                                                </td>
+                                                @*  <td>
+                                    @Html.Raw(item.Body)
+                                    </td>  *@
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.CategoryName)
+                                                </td>
+                                                <td>
+                                                    @item.PublishedDate
+                                                </td>
+                                               @*  <td>
+                                                    @Html.DisplayFor(modelItem => item.UserRole)
+                                                </td> *@
+                                                <td>
+                                                    @*  <ul> *@
+                                                    @foreach (var image in item.BlogImages)
+                                                    {
+                                                        @*  <li> *@
+                                                        <img width="50px" height="50px" src="/uploads/@image.Url" alt="/uploads/@image.ImageName" />
+                                                        @*    </li> *@
+                                                    }
+                                                    @*   </ul> *@
+                                                </td>
+
+                                                @* <td>
+                                    @Html.DisplayFor(modelItem => item.UpdatedAt)
+                                    </td> *@
+                                                <td>
+                                                    <a asp-action="Edit" class="btn btn-success btn-sm" title="Edit Blog" asp-route-id="@item.Id"> <i class="bi bi-pencil"></i></a> |
+                                                    <a asp-action="Details" class="btn btn-info btn-sm" title="Details" asp-route-id="@item.Id"><i class="bi bi-info"></i></a> |
+                                                    <a asp-action="RemoveBlog" class="btn btn-danger btn-sm" title="Remove Blog" asp-route-id="@item.Id"> <i class="bi bi-trash"></i> </a>
+
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+
+                        }
+
                     </div>
                 </div>
             </div>

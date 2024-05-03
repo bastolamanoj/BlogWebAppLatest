@@ -60,7 +60,7 @@
                         <div class="col-12 d-flex">
                             <label for="inputNanme4" class="form-label me-4 label-title">Has Image ?</label>
                             <div class="form-check ms-3 form-switch has-image">
-                                <input class="form-check-input has-image" type="checkbox" id="flexSwitchCheckDefault">
+                                <input class="form-check-input has-image checkImage" type="checkbox" id="flexSwitchCheckDefault">
                             </div>
                         </div>
 
@@ -135,7 +135,10 @@
         $(".publishPost").click(async function () {
 
             var files = $('#input-file')[0].files;
-            if (files.length === 0) {
+            var isChecked = $('.checkImage').prop('checked');
+
+            debugger;
+            if (files.length === 0 && isChecked) {
                 toastr.warning("Add Image for Blog");
                 return;
             }

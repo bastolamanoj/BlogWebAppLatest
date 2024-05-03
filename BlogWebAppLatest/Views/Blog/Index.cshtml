@@ -28,10 +28,11 @@
 
             @foreach (var item in Model)
             {
+                var imgUrl = (item.BlogImages != null && item.BlogImages.Count > 0) ? @item.BlogImages?[0].Url : "";
                 <div class="col-xl-4 col-md-6">
                     <article>
                          <div class="post-img">
-                                <img src="/Uploads/@item.BlogImages?[0].Url" alt="" class="img-fluid">
+                            <img src="/Uploads/@imgUrl" alt="" class="img-fluid">
                             </div>
                             <div class="row justify-content-between">
                                <p class="post-category col-md-4">@item.CategoryName </p>

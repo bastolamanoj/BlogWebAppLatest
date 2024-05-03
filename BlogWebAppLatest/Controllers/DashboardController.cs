@@ -142,11 +142,11 @@ namespace BlogWebApp.Controllers
 
 
                 dashboardData.TotalUpvotes = await _dbContext.Reactions
-                    .Where(r => userBlogIds.Contains(r.EntityId) && r.Type == "Upvote")
+                    .Where(r => userBlogIds.Contains(r.UserId) && r.Type == "Upvote")
                     .CountAsync();
 
                 dashboardData.TotalDownvotes = await _dbContext.Reactions
-                    .Where(r => userBlogIds.Contains(r.EntityId) && r.Type == "Downvote")
+                    .Where(r => userBlogIds.Contains(r.UserId) && r.Type == "Downvote")
                     .CountAsync();
 
                 dashboardData.TotalComments = await _dbContext.Comments

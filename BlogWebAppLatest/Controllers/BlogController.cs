@@ -326,6 +326,47 @@ namespace BlogWebApp.Controllers
             return View();
         }
 
+        //[UserAuthorize]
+        //[HttpGet("manageblog")]
+        //public IActionResult ManageBlog(int? page)
+        //{
+        //    // Get the current user
+        //    var user = _userManager.GetUserAsync(User).Result;
+        //    if (user == null)
+        //    {
+        //        // Handle case when user is not found
+        //        return NotFound();
+        //    }
+        //    int pageSize = 5;
+
+        //    // Retrieve all blogs of the current user including their blog images
+        //    // Define the query to retrieve blogs of the current user including their category details
+        //    var userBlogsQuery = from blog in _dbContext.Blogs
+        //                         join category in _dbContext.BlogCategories on blog.BlogCategoryId equals category.Id
+        //                         where blog.AuthorId == Guid.Parse(user.Id)
+        //                           // Filter blogs by AuthorId
+        //                         select new BlogVM
+        //                         {
+        //                             SN=1,
+        //                             Id = blog.Id,
+        //                             Title = blog.Title,
+        //                             Body = blog.Body,
+        //                             BlogCategoryId = blog.BlogCategoryId,
+        //                             PublishedDate = blog.CreationAt,
+        //                             CategoryName = category.Name, // Populate the category name
+        //                             BlogImages = blog.BlogImages.Select(bi => new BlogImageVM
+        //                             {
+        //                                 ImageName = bi.ImageName,
+        //                                 Url = bi.Url
+        //                             }).ToList()
+        //                         };
+
+        //    var userBlogs = userBlogsQuery
+        //        .ToPagedList(page ?? 1, pageSize); // Convert to paged list
+
+        //    return View(userBlogs); // Pass userBlogs to the view
+        //}
+
         [UserAuthorize]
         [HttpGet("manageblog")]
         public IActionResult ManageBlog(int? page)
@@ -337,19 +378,49 @@ namespace BlogWebApp.Controllers
                 // Handle case when user is not found
                 return NotFound();
             }
-            int pageSize = 3;
 
-            // Retrieve all blogs of the current user including their blog images
-            // Define the query to retrieve blogs of the current user including their category details
-            var userBlogsQuery = from blog in _dbContext.Blogs
+            int pageSize = 5;
+            IQueryable<BlogVM> userBlogsQuery;
+
+            if (_userManager.IsInRoleAsync(user, "Admin").Result)
+            {
+                // If the user is an admin, retrieve all blogs
+                userBlogsQuery = from blog in _dbContext.Blogs
                                  join category in _dbContext.BlogCategories on blog.BlogCategoryId equals category.Id
-                                 where blog.AuthorId == Guid.Parse(user.Id)
-                                   // Filter blogs by AuthorId
+                                 join userrole in _dbContext.UserRoles on blog.AuthorId.ToString() equals userrole.UserId
+                                 join roles in _dbContext.Roles on userrole.RoleId equals roles.Id
+
                                  select new BlogVM
                                  {
-                                     SN=1,
+                                     SN = 1,
                                      Id = blog.Id,
                                      Title = blog.Title,
+                                     IsOwnBlog= "",
+                                     Body = blog.Body,
+                                     UserRole= roles.Name,
+                                     BlogCategoryId = blog.BlogCategoryId,
+                                     PublishedDate = blog.CreationAt,
+                                     CategoryName = category.Name, // Populate the category name
+                                     BlogImages = blog.BlogImages.Select(bi => new BlogImageVM
+                                     {
+                                         ImageName = bi.ImageName,
+                                         Url = bi.Url
+                                     }).ToList()
+                                 };
+            }
+            else
+            {
+                // If the user is not an admin, only retrieve blogs authored by them
+                userBlogsQuery = from blog in _dbContext.Blogs
+                                 join category in _dbContext.BlogCategories on blog.BlogCategoryId equals category.Id
+                                 where blog.AuthorId == Guid.Parse(user.Id)
+                                 select new BlogVM
+                                 {
+                                     SN = 1,
+                                     Id = blog.Id,
+                                     Title = blog.Title,
+                                     IsOwnBlog = "",
+                                     UserRole="Blogger",
                                      Body = blog.Body,
                                      BlogCategoryId = blog.BlogCategoryId,
                                      PublishedDate = blog.CreationAt,
@@ -360,12 +431,14 @@ namespace BlogWebApp.Controllers
                                          Url = bi.Url
                                      }).ToList()
                                  };
+            }
 
             var userBlogs = userBlogsQuery
                 .ToPagedList(page ?? 1, pageSize); // Convert to paged list
 
             return View(userBlogs); // Pass userBlogs to the view
         }
+
 
         [UserAuthorize]
         [HttpGet]
@@ -424,6 +497,8 @@ namespace BlogWebApp.Controllers
                 await _dbContext.Blogs.AddAsync(blog);
                 //await _dbContext.SaveChangesAsync();
                 // Create the BlogImage objects
+                if(model.BlogImages != null)
+                {
                 foreach (var imageFile in model.BlogImages)
                 {
                     var blogImage = new BlogImage
@@ -434,6 +509,8 @@ namespace BlogWebApp.Controllers
                     };
                     _dbContext.BlogImages.Add(blogImage);
                 }
+
+                } 
                 try
                 {
                 await _dbContext.SaveChangesAsync();
@@ -474,16 +551,19 @@ namespace BlogWebApp.Controllers
                 var existingImages = _dbContext.BlogImages.Where(bi => bi.BlogId == blog.Id);
                 _dbContext.BlogImages.RemoveRange(existingImages);
 
-                // Add new images
-                foreach (var imageFile in model.BlogImages)
+                if (model.BlogImages != null)
                 {
-                    var blogImage = new BlogImage
+                    // Add new images
+                    foreach (var imageFile in model.BlogImages)
                     {
-                        BlogId = blog.Id,
-                        Url = imageFile.Url, 
-                        ImageName = imageFile.ImageName
-                    };
-                    _dbContext.BlogImages.Add(blogImage);
+                        var blogImage = new BlogImage
+                        {
+                            BlogId = blog.Id,
+                            Url = imageFile.Url,
+                            ImageName = imageFile.ImageName
+                        };
+                        _dbContext.BlogImages.Add(blogImage);
+                    }
                 }
 
                 await _dbContext.SaveChangesAsync();
@@ -509,6 +589,7 @@ namespace BlogWebApp.Controllers
 
             if (blog == null)
             {
+                TempData["ErrorMessage"] = "Blog Not Found.";
                 return NotFound(); // Blog not found
             }
 
@@ -529,7 +610,7 @@ namespace BlogWebApp.Controllers
             _dbContext.Blogs.Remove(blog);
 
             await _dbContext.SaveChangesAsync();
-
+            TempData["SuccessMessage"] = "Blog Removed Successfully...";
             return RedirectToAction("ManageBlog", "Blog"); // Redirect to home page or any other page after removal
         }
 
