@@ -40,8 +40,9 @@ builder.Services.AddSignalR();
 //DI
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<NotificationHub>();
-builder.Services.AddScoped<SubscribeNotificationTableDependency>();
-
+builder.Services.AddScoped<INotificationService, NotificationService>();
+//builder.Services.AddScoped<SubscribeNotificationTableDependency>();
+builder.Services.AddSingleton<SubscribeNotificationTableDependency>();
 
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
@@ -105,6 +106,6 @@ app.UseEndpoints(endpoints =>
 
 });
 #pragma warning restore ASP0014 // Suggest using top level route registrations
-//app.UseSqlTableDependency<SubscribeNotificationTableDependency>(notificationConnectionString);
+app.UseSqlTableDependency<SubscribeNotificationTableDependency>(connectionString);
 
 app.Run();
