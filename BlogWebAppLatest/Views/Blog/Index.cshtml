@@ -28,6 +28,7 @@
 
             @foreach (var item in Model)
             {
+                var imgUrl = (item.BlogImages != null && item.BlogImages.Count > 0) ? @item.BlogImages?[0].Url : "";
                 <div class="col-xl-4 col-md-6">
                     <article>
                          <div class="post-img">

@@ -14,8 +14,8 @@
         width: 50px!important;
         height: 52px;
         border-radius: 50%!important;
-   
     }
+
 </style>
 
 <div class="container">
@@ -40,7 +40,7 @@
                                 <div class="col-sm-6">
 
                                     <select class="form-select filterTotal" aria-label="Default select example">
-                                        <option selected value="-1">Select</option>
+                                        @* <option selected value="-1">Select</option> *@
                                         <option selected value="-1">All Time</option>
                                         @* <option value="0">Month</option> *@
                                         <option value="1">January</option>
@@ -159,7 +159,7 @@
                             <div class="col-sm-6">
                                 <select class="form-select filterBloggerTotal" aria-label="Default select example">
                                     <option selected value="null">All</option>
-                                    <option value="0">Month</option>
+                                    @* <option value="0">Month</option> *@
                                     <option value="1">January</option>
                                     <option value="2">February</option>
                                     <option value="3">March</option>
@@ -405,8 +405,8 @@
 
         function renderDashboardData(data, containerSelector) {
             $(".TotalBlogPosts").text(data.totalBlogPosts);
-            $(".TotalUpvote").text(data.totalUpvote);
-            $(".TotalDownvote").text(data.totalDownvote);
+            $(".TotalUpvotes").text(data.totalUpvotes);
+            $(".TotalDownvotes").text(data.totalDownvotes);
             $(".TotalComments").text(data.totalComments);
         }
 

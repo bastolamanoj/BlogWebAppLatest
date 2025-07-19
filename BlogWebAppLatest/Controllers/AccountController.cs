@@ -81,6 +81,11 @@ namespace BlogWebApp.Controllers
                         ModelState.AddModelError("", "You are not allowed to sign in. Please contact support.");
                         return View(model);
                     }
+                }else if(user == null)
+                {
+                    TempData["ErrorMessage"] = "User Not Found";
+                    ModelState.AddModelError("", "User Not Found.");
+                    return View(model);
                 }
                 else
                 {
@@ -192,6 +197,13 @@ namespace BlogWebApp.Controllers
         {
             //_roleManager
             return View( await _userManager.GetUsersInRoleAsync("Admin"));
+        }
+
+        [HttpGet("manageblogger")]
+        public async Task<IActionResult> ManageBloggers()
+        {
+            //_roleManager
+            return View( await _userManager.GetUsersInRoleAsync("Blogger"));
         }
 
         [HttpGet("register")]
@@ -334,13 +346,14 @@ namespace BlogWebApp.Controllers
 
             // Retrieve the user from the database using the provided userId
             var user = await _userManager.FindByIdAsync(userId);
-
+           
             // Check if the user exists
             if (user == null)
             {
                 ModelState.AddModelError("", "User not found.");
                 //return NotFound("User not found.");
             }
+            var userrole = await _userManager.GetRolesAsync(user);
 
             var totalUsersCount = await (
                from users in _dbcontext.Users
@@ -380,7 +393,7 @@ namespace BlogWebApp.Controllers
 
 
                 // Redirect the user to a suitable action, such as a list of users or another appropriate page
-                TempData["SuccessMessage"] = "Admin Deleted";
+                TempData["SuccessMessage"] = "Admin/Bloggger Deleted Successfully..";
                 return RedirectToAction("ManageAdmin", "Account"); // Redirect to a user management page
             }
             else
@@ -393,6 +406,42 @@ namespace BlogWebApp.Controllers
                 ModelState.AddModelError("","Failed");
                 return RedirectToAction("AddAdmin", "Account");
             }
+        }
+
+        //dete blogger by admin
+        public async Task<IActionResult> RemoveBlogger(string? id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                TempData["ErrorMessage"] = "User ID cannot be null or empty.";
+                ModelState.AddModelError("", "User ID cannot be null or empty.");
+            }
+            var user = await _userManager.FindByIdAsync(id);
+            var result = await _userManager.DeleteAsync(user);
+                // Check if the user deletion was successful
+                if (result.Succeeded)
+                {
+                    var blogsToRemove = _dbcontext.Blogs.Where(blog => blog.AuthorId.ToString() ==user.Id );
+                    _dbcontext.Blogs.RemoveRange(blogsToRemove);
+
+                    foreach (var blog in blogsToRemove)
+                    {
+                        // Remove associated comments
+                        var commentsToRemove = _dbcontext.Comments.Where(comment => comment.BlogId == blog.Id);
+                        _dbcontext.Comments.RemoveRange(commentsToRemove);
+
+                        // Remove associated replies
+                        var repliesToRemove = _dbcontext.CommentReplies.Where(reply => reply.comment.BlogId == blog.Id);
+                        //_dbcontext.CommentReplies.RemoveRange(repliesToRemove);
+                    }
+
+                    TempData["SuccessMessage"] = "Blogger Deleted Successfully.";
+                    await _signInManager.SignOutAsync();
+                    return RedirectToAction("ManageBloggers", "Account");
+                }
+                TempData["ErrorMessage"] = "Failed to delete.";
+                return RedirectToAction("ManageBloggers", "Account");
+
         }
 
         [HttpPost]
@@ -428,7 +477,6 @@ namespace BlogWebApp.Controllers
                         var repliesToRemove = _dbcontext.CommentReplies.Where(reply => reply.comment.BlogId == blog.Id);
                         //_dbcontext.CommentReplies.RemoveRange(repliesToRemove);
                     }
-
 
                     TempData["SuccessMessage"] = "Account Deleted Successfully.";
                     await _signInManager.SignOutAsync();

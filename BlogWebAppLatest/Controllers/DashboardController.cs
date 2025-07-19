@@ -129,6 +129,10 @@ namespace BlogWebApp.Controllers
 
             var userId = user.Id;
 
+            var userBlogIds = await _dbContext.Blogs
+                .Where(b => b.AuthorId.ToString() == userId)
+                .Select(b => b.Id)
+                .ToListAsync();
             // Get all-time data if userId is not provided
             if (month==null)
             {
@@ -136,10 +140,6 @@ namespace BlogWebApp.Controllers
                  .Where(b => b.AuthorId.ToString() == userId)
                  .CountAsync();
 
-                var userBlogIds = await _dbContext.Blogs
-                    .Where(b => b.AuthorId.ToString() == userId)
-                    .Select(b => b.Id)
-                    .ToListAsync();
 
                 dashboardData.TotalUpvotes = await _dbContext.Reactions
                     .Where(r => userBlogIds.Contains(r.EntityId) && r.Type == "Upvote")
@@ -169,9 +169,9 @@ namespace BlogWebApp.Controllers
 
                 // Calculate counts
                 dashboardData.TotalBlogPosts = await userBlogsQuery.CountAsync();
-                dashboardData.TotalUpvotes = await _dbContext.Reactions.Where(a => a.Type == "Upvote" && a.UserId.ToString() == userId && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).CountAsync();
-                dashboardData.TotalDownvotes = await _dbContext.Reactions.Where(a => a.Type == "Downvote" && a.UserId.ToString() == userId && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).CountAsync();
-                dashboardData.TotalComments = await _dbContext.Comments.CountAsync(comment => comment.CommentedBy.ToString() == userId && comment.CreationDate >= startOfMonth && comment.CreationDate <= endOfMonth);
+                dashboardData.TotalUpvotes = await _dbContext.Reactions.Where(a => a.Type == "Upvote" && userBlogIds.Contains(a.EntityId) && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).CountAsync();
+                dashboardData.TotalDownvotes = await _dbContext.Reactions.Where(a => a.Type == "Downvote" && userBlogIds.Contains(a.EntityId) && a.CreationDate >= startOfMonth && a.CreationDate <= endOfMonth).CountAsync();
+                dashboardData.TotalComments = await _dbContext.Comments.CountAsync(comment => userBlogIds.Contains(comment.BlogId) && comment.CreationDate >= startOfMonth && comment.CreationDate <= endOfMonth);
                 }
             }
 
