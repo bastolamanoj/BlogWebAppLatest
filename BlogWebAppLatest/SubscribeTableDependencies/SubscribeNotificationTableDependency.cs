@@ -2,12 +2,14 @@
 using BlogWebApp.Models;
 using BlogWebApp.SubscribeTableDependencies;
 using TableDependency.SqlClient;
+using TableDependency.SqlClient.Base.Enums;
 
 
 namespace BlogWebApp.SubscribeTableDependencies
 {
     public class SubscribeNotificationTableDependency : ISubscribeTableDependency
     {
+        //private const DmlTriggerType UpdateOf = DmlTriggerType.Insert | DmlTriggerType.Update;
         SqlTableDependency<Notification> tableDependency;
         NotificationHub notificationHub;
 
@@ -19,6 +21,7 @@ namespace BlogWebApp.SubscribeTableDependencies
         public void SubscribeTableDependency(string connectionString)
         {
             tableDependency = new SqlTableDependency<Notification>(connectionString);
+            //tableDependency = new SqlTableDependency<Notification>(connectionString, "Notifications",DmlTriggerType.Insert);
             tableDependency.OnChanged += TableDependency_OnChanged;
             tableDependency.OnError += TableDependency_OnError;
             tableDependency.Start();

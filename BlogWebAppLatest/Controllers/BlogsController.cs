@@ -23,7 +23,7 @@ namespace BlogWebApp.Controllers
         // GET: Blogs
         public async Task<IActionResult> Index()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
             return View(await _context.Blogs.ToListAsync());
         }
 

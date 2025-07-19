@@ -112,52 +112,52 @@ namespace BlogWebApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetNotification()
+        public async Task<IActionResult> GetNotification()
         {
-            var currentUser = _userManager.GetUserAsync(User).Result;
+            var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
             {
-                return null;
+                return NotFound(); // Return NotFound instead of null to follow best practices
             }
             var userId = currentUser.Id;
 
-            var notifications = (from noti in _context.Notifications
-                                 join blog in _context.Blogs on noti.BlogId equals blog.Id
-                                 join user in _context.Users on blog.AuthorId.ToString() equals user.Id
-                                 where blog.AuthorId == Guid.Parse(userId)
-                                 orderby noti.CreatedAt descending
-                                 select new NotificationVm
-                                 {
-                                     Id = noti.Id,
-                                     Title = noti.Title,
-                                     Body = noti.Body,
-                                     Username = user.DisplayName,
-                                     Url = user.ProfileUrl,
-                                     IsRead=noti.IsRead,
-                                     BlogId = blog.Id,
-                                     NotificationDate = noti.CreatedAt
-                                 }).ToList();
+            var notifications = await (from noti in _context.Notifications
+                                       join blog in _context.Blogs on noti.BlogId equals blog.Id
+                                       join user in _context.Users on blog.AuthorId.ToString() equals user.Id
+                                       where blog.AuthorId == Guid.Parse(userId)
+                                       orderby noti.CreatedAt descending
+                                       select new NotificationVm
+                                       {
+                                           Id = noti.Id,
+                                           Title = noti.Title,
+                                           Body = noti.Body,
+                                           Username = user.DisplayName,
+                                           Url = user.ProfileUrl,
+                                           IsRead = noti.IsRead,
+                                           BlogId = blog.Id,
+                                           NotificationDate = noti.CreatedAt
+                                       }).ToListAsync();
 
-            var unreadNotificationCount = notifications
-                .Count(noti => !noti.IsRead);
-            if (notifications.Count() > 0)
+            var unreadNotificationCount = notifications.Count(noti => !noti.IsRead);
+
+            if (notifications.Count > 0)
             {
-                var unreadlatestnoti = notifications.Where(a => !a.IsRead).FirstOrDefault();
-                if(unreadlatestnoti != null)
+                var unreadLatestNoti = notifications.FirstOrDefault(a => !a.IsRead);
+                if (unreadLatestNoti != null)
                 {
-                  TempData["SuccessMessage"] = unreadlatestnoti.Body;
+                    TempData["SuccessMessage"] = unreadLatestNoti.Body;
                 }
                 notifications[0].TotalNotification = unreadNotificationCount;
-
             }
 
-            if (notifications.Count() == 0)
+            if (notifications.Count == 0)
             {
                 return NotFound();
             }
 
-            return Ok(new { notifications = notifications });
+            return Ok(new { notifications });
         }
+
 
         //[HttpGet]
         //public async Task<IActionResult> GetNotification()

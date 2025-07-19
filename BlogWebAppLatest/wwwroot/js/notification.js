@@ -55,6 +55,31 @@ connection.on("ReceivedNotification", function (notificatons) {
 
 connection.on("ReceivedPersonalNotification", function (message, username) {
     //DisplayPersonalNotification(message, 'Hey ' + username); 
-    console.log(message, 'General Message');
+    debugger;
+    $(".badge-number").text(notificatons[0].TotalNotification);
+    console.log("Message hub", message);
+    var $container = $(".notifications");
+    $.each(notificatons, function (index, post) {
+
+        var postHtml = `
+                            <li class="notification-item" id="${post.id}">
+                               <a href="/blog-details?id=${post.blogId}">
+                                       <img src="/Uploads/${post.url}" alt="Profile" style="height:40px;width:40px;"  class="rounded-circle">
+                                    <i class="bi bi-exclamation-circle text-success"></i>
+                            <div>
+                                    <h4>${post.username}</h4>
+                                    <p>${post.body}</p>
+                                    <p>${post.notificationDate}</p>
+                            </div>
+                            </a>
+                        </li>
+
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                `;
+
+        $container.prepend(postHtml);
+    });
 });
 

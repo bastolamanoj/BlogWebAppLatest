@@ -118,6 +118,7 @@ else
             url: '/Notifications/GetNotification',
             type: 'GET',
             success: function (data) {
+               
                 renderPosts(data.notifications, '.notifications');
             },
             error: function (xhr, status, error) {
@@ -168,7 +169,7 @@ else
             });
 
             $.ajax({
-                url: '/Notifications/UdpateNotificationStaus/',
+                url: '/Notifications/UdpateNotificationStaus',
                 type: 'POST',
                 contentType: "application/json",
                 data: JSON.stringify(notificationIds),

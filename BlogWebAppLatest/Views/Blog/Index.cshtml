@@ -31,7 +31,14 @@
                 <div class="col-xl-4 col-md-6">
                     <article>
                          <div class="post-img">
-                                <img src="/Uploads/@item.BlogImages?[0].Url" alt="" class="img-fluid">
+                            @if (item.BlogImages != null && item.BlogImages.Count > 0)
+                            {
+                                <img src="/Uploads/@item.BlogImages[0].Url" alt="" class="img-fluid">
+                            }
+                            else
+                            {
+                                <img src="/Uploads/default-image.jpg" alt="Default Image" class="img-fluid">
+                            }
                             </div>
                             <div class="row justify-content-between">
                                <p class="post-category col-md-4">@item.CategoryName </p>

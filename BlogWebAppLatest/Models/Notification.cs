@@ -5,7 +5,7 @@ namespace BlogWebApp.Models
     public class Notification
     {
         public int Id { get; set; }
-        public string Title { get; set; }   // This the Notification Title
+        public string Title { get; set; }   // This is the Notification Title
         public string? Body { get; set; }   
         public string? MessageType { get; set; }
         public string? Username { get; set; }

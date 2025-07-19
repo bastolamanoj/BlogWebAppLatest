@@ -18,14 +18,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-var notificationConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'NotificationConnection' not found.");
+var notificationConnectionString = builder.Configuration.GetConnectionString("NotificationConnection") ?? throw new InvalidOperationException("Connection string 'NotificationConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(notificationConnectionString),
     ServiceLifetime.Singleton);
 
 // Register ApplicationDbContext as scoped for other services
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString), ServiceLifetime.Scoped);
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -38,9 +38,9 @@ builder.Services.AddIdentity<User, Role>(options => options.SignIn.RequireConfir
 builder.Services.AddSignalR();
 
 //DI
-//builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-//builder.Services.AddSingleton<NotificationHub>();
-//builder.Services.AddSingleton<SubscribeNotificationTableDependency>();
+builder.Services.AddScoped<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped<NotificationHub>();
+builder.Services.AddScoped<SubscribeNotificationTableDependency>();
 
 
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
@@ -61,7 +61,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    //app.UseExceptionHandler("/Home/Error");
     //app.UseMigrationsEndPoint();
 }
 else
@@ -79,9 +79,9 @@ app.UseRouting();
 //app.UseRedirectMiddleware();
 
 app.UseAuthorization();
-//app.MapHub<NotificationHub>("/notificationHub");
+app.MapHub<NotificationHub>("/notificationHub");
 
-app.UseExceptionHandler("/Home/Error");
+//app.UseExceptionHandler("/Home/Error");
 
 #pragma warning disable ASP0014 // Suggest using top level route registrations
 app.UseEndpoints(endpoints =>
@@ -105,6 +105,6 @@ app.UseEndpoints(endpoints =>
 
 });
 #pragma warning restore ASP0014 // Suggest using top level route registrations
-//app.UseSqlTableDependency<SubscribeNotificationTableDependency>(notificationConnectionString);
+app.UseSqlTableDependency<SubscribeNotificationTableDependency>(notificationConnectionString);
 
 app.Run();
