@@ -57,7 +57,7 @@ connection.on("ReceivedPersonalNotification", function (notificatons) {
     //DisplayPersonalNotification(message, 'Hey ' + username); 
     console.log(notificatons);
     debugger
-    $(".badge-number").text(notificatons[0].TotalNotification);
+    $(".badge-number").text(notificatons[0].totalNotification);
     console.log("Message hub", message);
     var $container = $(".notifications");
     $.each(notificatons, function (index, post) {
